@@ -3,32 +3,30 @@ import { useParams } from "react-router-dom";
 import { ShoppingBag, Heart, Truck, ShieldCheck, RotateCcw } from "lucide-react";
 import Container from "../components/Container";
 import { useCart } from "../context/CartContext";
-
-const SAMPLE_PRODUCT = {
-  _id: "1",
-  title: "Aria Wireless Earbuds",
-  shortDescription: "Active noise cancellation, 30-hour battery, plush memory-foam tips.",
-  description:
-    "Aria pairs a precision-tuned driver with adaptive ANC for all-day listening. Splash-resistant, fast-charging, and built to disappear in your pocket.",
-  price: 129,
-  discountPrice: 99,
-  stock: 14,
-  brand: "Nova Audio",
-  category: "Audio",
-  images: [],
-};
+import axios from "axios";
 
 export default function SingleProduct() {
   const { id } = useParams();
-  const [product, setProduct] = useState(SAMPLE_PRODUCT);
+  const [product, setProduct] = useState('');
   const [activeImage, setActiveImage] = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
   const { addToCart } = useCart();
 
   useEffect(() => {
-    // Swap for a real fetch once your backend is connected:
-    // api.get(`/product/singleProduct/${id}`).then(res => setProduct(res.data.product));
+ try {
+     async function getProduct(){
+      let data = await axios.post(`http://localhost:3000/api/v1/product/singleProduct/${id}`)
+      setProduct(data.data.data);
+   
+    }
+    getProduct();
+ } catch (error) {
+  console.log(error);
+ }
   }, [id]);
+
+  console.log(product);
+  
 
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const images = product.images?.length ? product.images : [{ url: null }];

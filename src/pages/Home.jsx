@@ -5,17 +5,12 @@ import { ArrowRight } from "lucide-react";
 import Container from "../components/Container";
 import ProductCard from "../components/ProductCard";
 import { useScrollReveal } from "../hooks/useScrollReveal";
+import axios from "axios";
 
 const CATEGORIES = ["Audio", "Wearables", "Home", "Accessories"];
 
-const FEATURED = [
-  { _id: "1", title: "Aria Wireless Earbuds", price: 129, discountPrice: 99, images: [] },
-  { _id: "2", title: "Pulse Fitness Band", price: 89, images: [] },
-  { _id: "3", title: "Halo Desk Lamp", price: 59, discountPrice: 45, images: [] },
-  { _id: "4", title: "Drift Travel Backpack", price: 149, images: [] },
-];
-
 export default function Home() {
+  const [product, setProduct] = useState([]);
   const heroRef = useRef(null);
   const categoryRef = useScrollReveal();
   const productRef = useScrollReveal({ stagger: 0.06 });
@@ -35,6 +30,19 @@ export default function Home() {
     }, heroRef);
     return () => ctx.revert();
   }, []);
+
+  // product
+  useEffect(() => {
+  try {
+      async function getProduct() {
+      let data = await axios.get(`http://localhost:3000/api/v1/product/allProduct`)
+      setProduct(data.data.allProduct);
+    }
+    getProduct();
+  } catch (error) {
+    console.log(error);
+  }
+  }, [])
 
   return (
     <div>
@@ -124,7 +132,7 @@ export default function Home() {
           </div>
 
           <div ref={productRef} className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            {FEATURED.map((p) => (
+            {product.map((p) => (
               <ProductCard key={p._id} product={p} />
             ))}
           </div>
