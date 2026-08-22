@@ -4,31 +4,40 @@ import { SlidersHorizontal } from "lucide-react";
 import Container from "../components/Container";
 import ProductCard from "../components/ProductCard";
 import { useScrollReveal } from "../hooks/useScrollReveal";
-import api from "../api/axios";
-
-const SAMPLE = [
-  { _id: "1", title: "Aria Wireless Earbuds", price: 129, discountPrice: 99, category: "Audio", images: [] },
-  { _id: "2", title: "Pulse Fitness Band", price: 89, category: "Wearables", images: [] },
-  { _id: "3", title: "Halo Desk Lamp", price: 59, discountPrice: 45, category: "Home", images: [] },
-  { _id: "4", title: "Drift Travel Backpack", price: 149, category: "Accessories", images: [] },
-  { _id: "5", title: "Echo Bluetooth Speaker", price: 79, category: "Audio", images: [] },
-  { _id: "6", title: "Orbit Smart Watch", price: 199, discountPrice: 169, category: "Wearables", images: [] },
-];
+import axios from "axios";
 
 export default function Products() {
   const [searchParams] = useSearchParams();
-  const [products, setProducts] = useState(SAMPLE);
-  const [loading, setLoading] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState(searchParams.get("category") || "All");
   const [sort, setSort] = useState("newest");
   const gridRef = useScrollReveal({ stagger: 0.04 });
 
+  // product
   useEffect(() => {
-    // Swap this for a real fetch once your backend is connected:
-    // api.get("/product/allActiveProduct").then(res => setProducts(res.data.products));
+    async function getProduct() {
+      try {
+        setLoading(true);
+        let data = await axios.get(`http://localhost:3000/api/v1/product/allProduct`);
+        setProducts(data.data.allProduct || []);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    getProduct();
   }, []);
 
-  const categories = ["All", ...new Set(SAMPLE.map((p) => p.category))];
+  // Keep the filter in sync if the URL's ?category= changes (e.g. clicking a
+  // different category link from Home while already on this page).
+  useEffect(() => {
+    setCategory(searchParams.get("category") || "All");
+  }, [searchParams]);
+
+  // Real categories, built from the actual products — no dummy data.
+  const categories = ["All", ...new Set(products.map((p) => p.category).filter(Boolean))];
 
   const filtered = products
     .filter((p) => category === "All" || p.category === category)
@@ -43,7 +52,9 @@ export default function Products() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">Shop</p>
-          <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl"></h1>
+          <h1 className="mt-2 font-display text-2xl font-bold capitalize sm:text-3xl">
+            {category === "All" ? "All products" : category}
+          </h1>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-ink/50">
@@ -58,7 +69,7 @@ export default function Products() {
             <button
               key={c}
               onClick={() => setCategory(c)}
-              className={`rounded-full border px-4 py-2 text-sm font-medium transition ${
+              className={`rounded-full border px-4 py-2 text-sm font-medium capitalize transition ${
                 category === c
                   ? "border-ink bg-ink text-white"
                   : "border-ink/10 text-ink/60 hover:border-ink/30"
@@ -94,3 +105,4 @@ export default function Products() {
     </Container>
   );
 }
+

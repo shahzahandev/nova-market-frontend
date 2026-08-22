@@ -42,7 +42,7 @@ export default function ProductCard({ product }) {
         </div>
 
         <div className="mt-3 text-center">
-          <p className="text-[12px] text-ink">
+          <p className="text-[12px] text-ink capitalize">
             {product.category}
           </p>
           <p className="line-clamp-1 text-sm font-medium text-ink">{product.title}</p>
