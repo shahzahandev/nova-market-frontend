@@ -43,7 +43,7 @@ export default function Products() {
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">Shop</p>
-          <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl">All products</h1>
+          <h1 className="mt-2 font-display text-2xl font-bold sm:text-3xl"></h1>
         </div>
 
         <div className="flex items-center gap-2 text-sm text-ink/50">

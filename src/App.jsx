@@ -6,6 +6,7 @@ import Footer from "./components/Footer";
 
 import Home from "./pages/Home";
 import Products from "./pages/Products";
+import AddProduct from "./pages/AddProduct"
 import SingleProduct from "./pages/SingleProduct";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
@@ -14,6 +15,7 @@ import SignIn from "./pages/SignIn";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import EmailVerify from "./pages/EmailVerify";
+import ProductDetails from "./pages/ProductDetails";
 
 function StoreLayout() {
   return (
@@ -36,6 +38,8 @@ export default function App() {
             <Route element={<StoreLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
+              <Route path="/addProduct" element={<AddProduct />} />
+              <Route path="/productDetails/:id" element={<ProductDetails />} />
               <Route path="/products/:id" element={<SingleProduct />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/profile" element={<Profile />} />

@@ -1,19 +1,32 @@
 import { Link } from "react-router-dom";
-import { ShoppingBag } from "lucide-react";
-import { useCart } from "../context/CartContext";
+
+const API_ORIGIN = "http://localhost:3000";
+
+function imageSrc(url) {
+  if (!url) return "";
+  return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
+}
 
 export default function ProductCard({ product }) {
-  const { addToCart } = useCart();
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const mainImage = product.images?.find((i) => i.isMain) || product.images?.[0];
 
   return (
-    <div data-reveal className="group">
-      <Link to={`/products/${product._id}`} className="block">
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-mist">
-          {mainImage ? (
+    <div data-reveal className="group hover:bg-gray-300">
+      <div className="relative z-999">
+        <Link to={`/products/${product._id}`} className="block">
+          <button
+            className="absolute z-30 bottom-0 right-0 flex h-full w-full items-center justify-center bg-gray-300/70 text-white opacity-0 shadow-card transition-all duration-300  group-hover:opacity-100"
+            aria-label="Add to cart"
+          >
+            <button className="py-3 px-8 md:py-5 md:px-12 bg-black translate-y-2 group-hover:translate-y-0 transition-all duration-300 md:text-lg text-sm">View</button>
+          </button>
+        </Link>
+
+        <div className="relative aspect-square overflow-hidden bg-mist z-0">
+          {mainImage?.url ? (
             <img
-              src={mainImage.url}
+              src={imageSrc(mainImage.url)}
               alt={product.title}
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
@@ -26,33 +39,26 @@ export default function ProductCard({ product }) {
               -{Math.round(100 - (product.discountPrice / product.price) * 100)}%
             </span>
           )}
-
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              addToCart(product);
-            }}
-            className="absolute bottom-3 right-3 flex h-10 w-10 translate-y-2 items-center justify-center rounded-full bg-ink text-white opacity-0 shadow-card transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-            aria-label="Add to cart"
-          >
-            <ShoppingBag size={16} />
-          </button>
         </div>
 
-        <div className="mt-3">
+        <div className="mt-3 text-center">
+          <p className="text-[12px] text-ink">
+            {product.category}
+          </p>
           <p className="line-clamp-1 text-sm font-medium text-ink">{product.title}</p>
-          <div className="mt-1 flex items-center gap-2 font-mono">
+          <div className="mt-1 flex items-center justify-center gap-2 font-mono">
             {hasDiscount ? (
               <>
-                <span className="text-sm font-semibold text-ink">${product.discountPrice}</span>
-                <span className="text-xs text-ink/40 line-through">${product.price}</span>
+                <div className="flex flex-col">
+                  <span className="mb-2 text-sm font-semibold text-ink">৳{product.discountPrice}</span>
+                </div>
               </>
             ) : (
-              <span className="text-sm font-semibold text-ink">${product.price}</span>
+              <span className="mb-2 text-sm font-semibold text-ink">৳{product.price}</span>
             )}
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 }

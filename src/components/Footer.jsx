@@ -28,6 +28,9 @@ export default function Footer() {
         <Container className="flex flex-col items-center justify-between gap-2 text-xs text-white/50 sm:flex-row">
           <p>© {new Date().getFullYear()} Nova Market. All rights reserved.</p>
           <p>Designed for the modern shopper.</p>
+
+
+          <a className="text-red-400" href="/addProduct">add product</a>
         </Container>
       </div>
     </footer>

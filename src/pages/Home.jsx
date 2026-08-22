@@ -7,7 +7,7 @@ import ProductCard from "../components/ProductCard";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import axios from "axios";
 
-const CATEGORIES = ["Audio", "Wearables", "Home", "Accessories"];
+const CATEGORIES = ["laptop", "watch", "earbuds", "mobile"];
 
 export default function Home() {
   const [product, setProduct] = useState([]);
@@ -21,28 +21,37 @@ export default function Home() {
       tl.from("[data-hero-eyebrow]", { opacity: 0, y: 14, duration: 0.5 })
         .from("[data-hero-word]", { opacity: 0, y: 40, stagger: 0.08, duration: 0.7 }, "-=0.2")
         .from("[data-hero-sub]", { opacity: 0, y: 16, duration: 0.6 }, "-=0.3")
-        .from("[data-hero-cta]", { opacity: 0, y: 16, duration: 0.5 }, "-=0.4")
-        .from(
-          "[data-hero-badge]",
-          { opacity: 0, scale: 0.85, y: 20, duration: 0.6, ease: "back.out(1.7)" },
-          "-=0.5"
-        );
+        .from("[data-hero-cta]", { opacity: 0, y: 16, duration: 0.5 }, "-=0.4");
     }, heroRef);
     return () => ctx.revert();
   }, []);
 
   // product
   useEffect(() => {
-  try {
+    try {
       async function getProduct() {
-      let data = await axios.get(`http://localhost:3000/api/v1/product/allProduct`)
-      setProduct(data.data.allProduct);
+        let data = await axios.get(`http://localhost:3000/api/v1/product/allProduct`);
+        setProduct(data.data.allProduct);
+      }
+      getProduct();
+    } catch (error) {
+      console.log(error);
     }
-    getProduct();
-  } catch (error) {
-    console.log(error);
-  }
-  }, [])
+  }, []);
+
+    useEffect(() => {
+    try {
+      async function getProduct() {
+        let data = await axios.get(`http://localhost:3000/api/v1/product/allCategory`);
+        // setProduct(data.data.allProduct);
+        console.log(data.data.allCategory);
+        
+      }
+      getProduct();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
 
   return (
     <div>
@@ -86,14 +95,6 @@ export default function Home() {
                 <span className="font-display text-sm text-white/30">Product shot</span>
               </div>
             </div>
-
-            <div
-              data-hero-badge
-              className="absolute -bottom-4 -left-4 rounded-2xl bg-white px-5 py-4 text-ink shadow-card"
-            >
-              <p className="text-[10px] font-medium uppercase tracking-wide text-ink/40">Offer ends in</p>
-              <p className="font-mono text-lg font-bold text-brand-600">12:04:31</p>
-            </div>
           </div>
         </Container>
       </section>
@@ -107,8 +108,7 @@ export default function Home() {
                 key={cat}
                 to={`/products?category=${cat}`}
                 data-reveal
-                className="group flex aspect-[4/3] flex-col justify-end rounded-2xl bg-mist p-5 transition hover:bg-ink"
-              >
+                className="group flex aspect-[4/3] flex-col justify-end rounded-2xl bg-mist p-5 transition hover:bg-ink">
                 <span className="font-display text-lg font-semibold text-ink transition group-hover:text-white">
                   {cat}
                 </span>
@@ -131,7 +131,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div ref={productRef} className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+          <div ref={productRef} className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4">
             {product.map((p) => (
               <ProductCard key={p._id} product={p} />
             ))}
