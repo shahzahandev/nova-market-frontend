@@ -3,6 +3,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import About from "./components/About";
+
 
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -43,6 +45,7 @@ export default function App() {
               <Route path="/products/:id" element={<SingleProduct />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/about" element={<About/>}/>
             </Route>
 
             <Route path="/signup" element={<SignUp />} />

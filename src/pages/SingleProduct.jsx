@@ -8,7 +8,6 @@ const API_ORIGIN = "http://localhost:3000";
 
 function imageSrc(url) {
   if (!url) return "";
-
   return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
 }
 
@@ -165,7 +164,7 @@ export default function SingleProduct() {
                     ৳{product.price}
                   </span>
                       <span className="rounded-full bg-amber-400/20 px-2.5 py-1 text-xs font-bold text-amber-600">
-                                    -{discountPercent}%
+                      -{discountPercent}%
                   </span>
                 </>
               ) : (
