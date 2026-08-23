@@ -31,7 +31,6 @@ export default function Footer() {
       <div className="border-t border-white/10 py-6">
         <Container className="flex flex-col items-center justify-center gap-2 text-xs text-slate-800 sm:flex-row">
           <p>©2026 NovaMarket. All rights reserved.</p>
-               <a className="text-red-400" href="/addProduct">add product</a>
         </Container>
       </div>
     </footer>

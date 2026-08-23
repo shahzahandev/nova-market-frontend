@@ -8,26 +8,13 @@ import { useScrollReveal } from "../hooks/useScrollReveal";
 import axios from "axios";
 import About from "../components/About";
 
-
-const CATEGORY_IMAGES = {
-  laptop: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&q=80",
-  watch: "https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=400&q=80",
-  earbuds: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&q=80",
-  mobile: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?w=400&q=80",
-};
-const FALLBACK_CATEGORY_IMAGE = "https://images.unsplash.com/photo-1526406915894-7bcd65f60845?w=400&q=80";
-
-function getCategoryImage(name) {
-  const key = name?.toLowerCase().trim();
-  return CATEGORY_IMAGES[key] || FALLBACK_CATEGORY_IMAGE;
-}
-
 export default function Home() {
   const [product, setProduct] = useState([]);
   const [categories, setCategories] = useState([]);
   const heroRef = useRef(null);
   const categoryRef = useScrollReveal();
   const productRef = useScrollReveal({ stagger: 0.06 });
+  const [discount, setDiscount] = useState([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -40,12 +27,26 @@ export default function Home() {
     return () => ctx.revert();
   }, []);
 
-  // product
+  //Active product
   useEffect(() => {
     try {
       async function getProduct() {
-        let data = await axios.get(`http://localhost:3000/api/v1/product/allProduct`);
-        setProduct(data.data.allProduct);
+        let data = await axios.get(`http://localhost:3000/api/v1/product/allActiveProduct`);
+        setProduct(data.data.products);
+        
+      }
+      getProduct();
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+    // Discount product
+  useEffect(() => {
+    try {
+      async function getProduct() {
+        let data = await axios.get(`http://localhost:3000/api/v1/product/discountProduct`);
+        setDiscount(data.data.products);
       }
       getProduct();
     } catch (error) {
@@ -68,7 +69,6 @@ export default function Home() {
         console.log(error);
       }
     };
-
     getCategories();
   }, []);
 
@@ -142,6 +142,10 @@ export default function Home() {
     {/* categories */}
       <section className="py-16">
         <Container>
+             <div className="mb-10">
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">Search by</p>
+              <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Categories products</h2>
+            </div>
           <div
             ref={categoryRef}
             className="grid grid-cols-1 gap-6 sm:grid-cols-4"
@@ -151,35 +155,46 @@ export default function Home() {
                 key={cat}
                 to={`/products?category=${cat}`}
                 data-reveal
-                className="group overflow-hidden rounded-2xl bg-white shadow-sm"
+                className="group overflow-hidden rounded-2xl bg-gray-100 shadow-sm"
               >
+                
                 {/* Category Name + View All */}
                 <div className="flex flex-col items-center justify-center px-4 py-4 transition-colors duration-500 group-hover:bg-black/10">
                   <h3 className="font-display text-4xl font-bold capitalize text-gray-900 transition-colors duration-500">
                     {cat}
                   </h3>
-
-                  <span className="mt-4 text-lg font-medium text-gray-600 transition-colors duration-500">
+                  <span className="mt-4 text-sm font-medium text-gray-600 transition-colors duration-500">
                     View All
                   </span>
-                </div>
-
-                {/* Category Image */}
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <img
-                    src={getCategoryImage(cat)}
-                    alt={cat}
-                    className="h-full w-full object-cover transition-all duration-500 group-hover:scale-105 group-hover:opacity-90"
-                  />
-
-                  {/* Red Overlay */}
-                  <div className="absolute inset-0 bg-transparent transition-colors duration-500 group-hover:bg-black/10"></div>
-                </div>
+                </div>     
               </Link>
             ))}
           </div>
         </Container>
       </section>
+
+
+         {/* Featured products */}
+      <section className="py-16">
+        <Container>
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">take offers</p>
+              <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Discount products</h2>
+            </div>
+            <Link to="/products" className="hidden text-sm font-semibold text-ink/70 hover:text-ink sm:block">
+              View all →
+            </Link>
+          </div>
+
+          <div ref={productRef} className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4">
+            {discount.reverse().map((p) => (
+              <ProductCard key={p._id} product={p} />
+            ))}
+          </div>
+        </Container>
+      </section>
+
 
       <About></About>
     </div>

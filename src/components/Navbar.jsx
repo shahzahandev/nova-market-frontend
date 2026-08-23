@@ -46,8 +46,6 @@ export default function Navbar() {
     getCategories();
   }, []);
 
-  console.log(categories);
-  
 
   // GET PRODUCTS
   useEffect(() => {

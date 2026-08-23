@@ -8,7 +8,6 @@ import About from "./components/About";
 
 import Home from "./pages/Home";
 import Products from "./pages/Products";
-import AddProduct from "./pages/AddProduct"
 import SingleProduct from "./pages/SingleProduct";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
@@ -40,7 +39,6 @@ export default function App() {
             <Route element={<StoreLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/products" element={<Products />} />
-              <Route path="/addProduct" element={<AddProduct />} />
               <Route path="/productDetails/:id" element={<ProductDetails />} />
               <Route path="/products/:id" element={<SingleProduct />} />
               <Route path="/cart" element={<Cart />} />
