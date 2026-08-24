@@ -14,7 +14,6 @@ export default function Home() {
   const heroRef = useRef(null);
   const categoryRef = useScrollReveal();
   const productRef = useScrollReveal({ stagger: 0.06 });
-  const [discount, setDiscount] = useState([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -34,19 +33,6 @@ export default function Home() {
         let data = await axios.get(`http://localhost:3000/api/v1/product/allActiveProduct`);
         setProduct(data.data.products);
         
-      }
-      getProduct();
-    } catch (error) {
-      console.log(error);
-    }
-  }, []);
-
-    // Discount product
-  useEffect(() => {
-    try {
-      async function getProduct() {
-        let data = await axios.get(`http://localhost:3000/api/v1/product/discountProduct`);
-        setDiscount(data.data.products);
       }
       getProduct();
     } catch (error) {
@@ -172,30 +158,7 @@ export default function Home() {
           </div>
         </Container>
       </section>
-
-
-         {/* Featured products */}
-      <section className="py-16">
-        <Container>
-          <div className="mb-8 flex items-end justify-between">
-            <div>
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">take offers</p>
-              <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Discount products</h2>
-            </div>
-            <Link to="/products" className="hidden text-sm font-semibold text-ink/70 hover:text-ink sm:block">
-              View all →
-            </Link>
-          </div>
-
-          <div ref={productRef} className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4">
-            {discount.reverse().map((p) => (
-              <ProductCard key={p._id} product={p} />
-            ))}
-          </div>
-        </Container>
-      </section>
-
-
+      
       <About></About>
     </div>
   );

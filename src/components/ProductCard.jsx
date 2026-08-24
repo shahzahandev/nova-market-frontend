@@ -4,26 +4,131 @@ const API_ORIGIN = "http://localhost:3000";
 
 function imageSrc(url) {
   if (!url) return "";
-  return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
+
+  return url.startsWith("http")
+    ? url
+    : `${API_ORIGIN}${url}`;
+}
+
+// =====================================================
+// Date Only Helper
+// =====================================================
+
+function getDateOnly(dateValue) {
+  if (!dateValue) return null;
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  // Local date only
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  );
 }
 
 export default function ProductCard({ product }) {
-  const hasDiscount = product.discountPrice && product.discountPrice < product.price;
-  const mainImage = product.images?.find((i) => i.isMain) || product.images?.[0];
+  // =====================================================
+  // Main Image
+  // =====================================================
+
+  const mainImage =
+    product.images?.find(
+      (image) => image.isMain
+    ) || product.images?.[0];
+
+  // =====================================================
+  // Today's Date
+  // =====================================================
+
+  const today = getDateOnly(
+    new Date()
+  );
+
+  // =====================================================
+  // Discount Dates
+  // =====================================================
+
+  const startDate = getDateOnly(
+    product.discountStartDate
+  );
+
+  const endDate = getDateOnly(
+    product.discountEndDate
+  );
+
+  // =====================================================
+  // Discount Date Validation
+  // =====================================================
+
+  const discountStarted =
+    startDate &&
+    today &&
+    today >= startDate;
+
+  const discountNotExpired =
+    endDate &&
+    today &&
+    today <= endDate;
+
+  // =====================================================
+  // Final Discount Check
+  // =====================================================
+
+  const hasDiscount =
+    Number(product.discountPrice) <
+      Number(product.price) &&
+    discountStarted &&
+    discountNotExpired;
+
+  // =====================================================
+  // Discount Percentage
+  // =====================================================
+
+  const discountPercentage = hasDiscount
+    ? Math.round(
+        100 -
+          (Number(product.discountPrice) /
+            Number(product.price)) *
+            100
+      )
+    : 0;
 
   return (
-    <div data-reveal className="group hover:bg-gray-300">
+    <div
+      data-reveal
+      className="group hover:bg-gray-300"
+    >
       <div className="relative z-999">
-        <Link to={`/products/${product._id}`} className="block">
-          <button
-            className="absolute z-30 bottom-0 right-0 flex h-full w-full items-center justify-center bg-gray-300/70 text-white opacity-0 shadow-card transition-all duration-300  group-hover:opacity-100"
-            aria-label="Add to cart"
+
+        {/* =================================================
+            View Product
+        ================================================= */}
+
+        <Link
+          to={`/products/${product._id}`}
+          className="block"
+        >
+          <div
+            className="absolute bottom-0 right-0 z-30 flex h-full w-full items-center justify-center bg-gray-300/70 text-white opacity-0 shadow-card transition-all duration-300 group-hover:opacity-100"
+            aria-label="View product"
           >
-            <button className="py-3 px-8 md:py-5 md:px-12 bg-black translate-y-2 group-hover:translate-y-0 transition-all duration-300 md:text-lg text-sm">View</button>
-          </button>
+            <span className="translate-y-2 bg-black px-8 py-3 text-sm transition-all duration-300 group-hover:translate-y-0 md:px-12 md:py-5 md:text-lg">
+              View
+            </span>
+          </div>
         </Link>
 
-        <div className="relative aspect-square overflow-hidden bg-mist z-0">
+        {/* =================================================
+            Product Image
+        ================================================= */}
+
+        <div className="relative z-0 aspect-square overflow-hidden bg-mist">
+
           {mainImage?.url ? (
             <img
               src={imageSrc(mainImage.url)}
@@ -31,31 +136,68 @@ export default function ProductCard({ product }) {
               className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-ink/20">No image</div>
+            <div className="flex h-full items-center justify-center text-ink/20">
+              No image
+            </div>
           )}
+
+          {/* =================================================
+              Discount Percentage Badge
+          ================================================= */}
 
           {hasDiscount && (
             <span className="absolute left-3 top-3 rounded-full bg-amber-400 px-2.5 py-1 text-xs font-bold text-ink">
-              -{Math.round(100 - (product.discountPrice / product.price) * 100)}%
+              -{discountPercentage}%
             </span>
           )}
         </div>
 
+        {/* =================================================
+            Product Information
+        ================================================= */}
+
         <div className="mt-3 text-center">
+
+          {/* Category */}
+
           <p className="text-[12px] text-ink capitalize">
             {product.category}
           </p>
-          <p className="line-clamp-1 text-sm font-medium text-ink">{product.title}</p>
-          <div className="mt-1 flex items-center justify-center gap-2 font-mono">
+
+          {/* Product Title */}
+
+          <p className="line-clamp-1 text-sm font-medium text-ink">
+            {product.title}
+          </p>
+
+          {/* =================================================
+              Price
+          ================================================= */}
+
+          <div className="flex items-center justify-center gap-1">
+
             {hasDiscount ? (
               <>
-                <div className="flex flex-col">
-                  <span className="mb-2 text-sm font-semibold text-ink">৳{product.discountPrice}</span>
-                </div>
+                {/* Discount Price */}
+
+                <span className="text-[12px] font-bold text-black">
+                  ৳{product.discountPrice}
+                </span>
+
+                {/* Original Price */}
+
+                <span className="text-[10px] text-slate-600 line-through">
+                  ৳{product.price}
+                </span>
               </>
             ) : (
-              <span className="mb-2 text-sm font-semibold text-ink">৳{product.price}</span>
+              /* Normal Price */
+
+              <span className="text-sm font-bold text-slate-500">
+                ৳{product.price}
+              </span>
             )}
+
           </div>
         </div>
       </div>

@@ -12,9 +12,9 @@ export default function Footer() {
         <div>
           <h3 className="text-4xl font-semibold text-slate-700">Follow us</h3>
           <div className="mt-5 flex gap-3 text-slate-600">
-            <Instagram size={30} className="hover:text-black" />
-            <Facebook size={30} className="hover:text-black" />
-            <Twitter size={30} className="hover:text-black" />
+            <Instagram size={25} className="hover:text-black" />
+            <Facebook size={25} className="hover:text-black" />
+            <Twitter size={25} className="hover:text-black" />
           </div>
         </div>
 
