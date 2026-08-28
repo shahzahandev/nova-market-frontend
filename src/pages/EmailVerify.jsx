@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
-import api from "../api/axios";
+import axios from "axios";
 
 export default function EmailVerify() {
   const { token } = useParams();
@@ -11,9 +11,11 @@ export default function EmailVerify() {
   useEffect(() => {
     async function verify() {
       try {
-        const res = await api.get(`/auth/verify-email/${token}`);
+        const res = await axios.post(`http://localhost:3000/api/v1/auth/verifyemail/${token}`); 
         setStatus("success");
         setMessage(res.data?.message || "Your email has been verified.");
+        // console.log(res);
+        
       } catch (err) {
         setStatus("error");
         setMessage(err.response?.data?.message || "This verification link is invalid or expired.");

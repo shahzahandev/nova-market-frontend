@@ -25,7 +25,7 @@ export default function AuthLayout({ eyebrow, title, subtitle, children }) {
 
       <div className="flex items-center justify-center px-4 py-12 sm:px-8">
         <div className="w-full max-w-sm">
-          <div className="mb-8 lg:hidden">
+          <div className="mb-8">
             <Link to="/" className="font-display text-xl font-bold">
               Nova<span className="text-brand-500">Market</span>
             </Link>

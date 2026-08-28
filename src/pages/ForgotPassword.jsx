@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import api from "../api/axios";
 import AuthLayout from "../components/AuthLayout";
 import { FormField, SubmitButton, FormMessage } from "../components/FormField";
+import axios from "axios";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -19,8 +20,9 @@ export default function ForgotPassword() {
 
     try {
       setLoading(true);
-      const res = await api.post("/auth/forgot-password", { email });
-      setSuccess(res.data?.message || "Password reset link sent. Check your inbox.");
+      const res = await axios.post("http://localhost:3000/api/v1/auth/forgotPassword", { email });
+      setSuccess(res.data.message);
+      
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong. Please try again.");
     } finally {

@@ -49,8 +49,8 @@ export default function App() {
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/verify-email/:token" element={<EmailVerify />} />
+            <Route path="/resetpassword/:token" element={<ResetPassword />} />
+            <Route path="/verifyemail/:token" element={<EmailVerify />} />
           </Routes>
         </BrowserRouter>
       </CartProvider>
