@@ -11,7 +11,7 @@ export default function EmailVerify() {
   useEffect(() => {
     async function verify() {
       try {
-        const res = await axios.post(`http://localhost:3000/api/v1/auth/verifyemail/${token}`); 
+        const res = await axios.post(`https://nova-market-backend-2.onrender.com/api/v1/auth/verifyemail/${token}`); 
         setStatus("success");
         setMessage(res.data?.message || "Your email has been verified.");
         // console.log(res);

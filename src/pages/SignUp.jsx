@@ -24,9 +24,6 @@ export default function SignUp() {
     if (error) { setError(""); }
   };
 
-
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -60,11 +57,8 @@ export default function SignUp() {
 
     try {
       setLoading(true);
-      await axios.post(`http://localhost:3000/api/v1/auth/register`, formData)
-
+      await axios.post(`https://nova-market-backend-2.onrender.com/api/v1/auth/register`, formData)
       setSuccess("Account created. Please check your email to verify your account. And login.")
-
-
       setTimeout(() => {
         navigate("/signin",
           {

@@ -12,7 +12,7 @@ import { useCart } from "../context/CartContext";
 
 const MAX_THUMBNAILS = 5;
 
-const API_ORIGIN = "http://localhost:3000";
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
     if (!url) return "";

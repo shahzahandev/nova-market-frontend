@@ -19,7 +19,7 @@ export default function Products() {
     async function getProduct() {
       try {
         setLoading(true);
-        let data = await axios.get(`http://localhost:3000/api/v1/product/allProduct`);
+        let data = await axios.get(`https://nova-market-backend-2.onrender.com/api/v1/product/allProduct`);
         setProducts(data.data.allProduct || []);
       } catch (error) {
         console.log(error);

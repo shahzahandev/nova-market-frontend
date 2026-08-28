@@ -5,7 +5,7 @@ import axios from "axios";
 
 const MAX_THUMBNAILS = 5;
 
-const API_ORIGIN = "http://localhost:3000";
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
     if (!url) return "";
@@ -14,11 +14,6 @@ function imageSrc(url) {
         ? url
         : `${API_ORIGIN}${url}`;
 }
-
-// =====================================================
-// Convert date to local date only
-// Time will be ignored
-// =====================================================
 
 function getDateOnly(dateValue) {
     if (!dateValue) return null;
@@ -43,9 +38,6 @@ export default function SingleProduct() {
     const [product, setProduct] = useState(null);
     const [activeImage, setActiveImage] = useState(0);
 
-    // =====================================================
-    // Fetch Product
-    // =====================================================
 
     useEffect(() => {
         async function getProduct() {
@@ -66,10 +58,6 @@ export default function SingleProduct() {
         getProduct();
     }, [id]);
 
-    // =====================================================
-    // Set Main Image
-    // =====================================================
-
     useEffect(() => {
         if (!product?.images?.length) {
             setActiveImage(0);
@@ -87,10 +75,6 @@ export default function SingleProduct() {
         );
     }, [product]);
 
-    // =====================================================
-    // Loading
-    // =====================================================
-
     if (!product) {
         return (
             <p className="py-20 text-center text-sm text-ink/40">
@@ -99,9 +83,6 @@ export default function SingleProduct() {
         );
     }
 
-    // =====================================================
-    // Images
-    // =====================================================
 
     const images = product.images?.length
         ? product.images
@@ -111,10 +92,6 @@ export default function SingleProduct() {
         0,
         MAX_THUMBNAILS
     );
-
-    // =====================================================
-    // Discount Date Logic
-    // =====================================================
 
     const today = getDateOnly(new Date());
 
@@ -146,10 +123,7 @@ export default function SingleProduct() {
         discountStarted &&
         discountNotExpired;
 
-    // =====================================================
-    // Discount Percentage
-    // =====================================================
-
+ 
     const discountPercent = hasDiscount
         ? Math.round(
               100 -
@@ -163,16 +137,9 @@ export default function SingleProduct() {
         <Container className="py-6 sm:py-8 md:py-10">
 
             <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
-
-                {/* =================================================
-                    Product Images
-                ================================================= */}
-
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-5">
-
                     {visibleImages.length > 1 && (
                         <div className="order-2 flex w-full gap-3 overflow-x-auto pb-1 md:order-1 md:w-20 md:flex-col md:overflow-hidden md:pb-0">
-
                             {visibleImages.map(
                                 (img, i) => (
                                     <button
@@ -239,11 +206,6 @@ export default function SingleProduct() {
 
                     </div>
                 </div>
-
-                {/* =================================================
-                    Product Information
-                ================================================= */}
-
                 <div className="flex flex-col">
 
                     <div className="text-center md:text-start">

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-const API_ORIGIN = "http://localhost:3000";
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
   if (!url) return "";

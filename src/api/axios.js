@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // Point this at your real backend when you wire it up.
-export const API_ORIGIN = "http://localhost:3000";
+export const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 const api = axios.create({
   baseURL: `${API_ORIGIN}/api/v1`,

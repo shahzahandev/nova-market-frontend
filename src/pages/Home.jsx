@@ -30,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     try {
       async function getProduct() {
-        let data = await axios.get(`http://localhost:3000/api/v1/product/allActiveProduct`);
+        let data = await axios.get(`https://nova-market-backend-2.onrender.com/api/v1/product/allActiveProduct`);
         setProduct(data.data.products);
         
       }
@@ -45,7 +45,7 @@ export default function Home() {
     const getCategories = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/v1/product/allCategory"
+          "https://nova-market-backend-2.onrender.com/api/v1/product/allCategory"
         );
         const list = (response.data.allCategory || []).map(
           (category) => category.name

@@ -12,7 +12,7 @@ ChevronDown,
 import Container from "./Container";
 import { useCart } from "../context/CartContext";
 
-const API_ORIGIN = "http://localhost:3000";
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
 if (!url) return "";
