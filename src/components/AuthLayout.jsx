@@ -4,9 +4,9 @@ export default function AuthLayout({ eyebrow, title, subtitle, children }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div className="relative hidden flex-col justify-between overflow-hidden bg-ink p-12 text-white lg:flex">
-        <Link to="/" className="font-display text-xl font-bold">
+        {/* <Link to="/" className="font-display text-xl font-bold">
           Nova<span className="text-brand-400">Market</span>
-        </Link>
+        </Link> */}
 
         <div className="max-w-md">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-300">

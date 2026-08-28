@@ -10,7 +10,7 @@ export default function Footer() {
         ]} />
 
         <div>
-          <h3 className="text-4xl font-semibold text-slate-700">Follow us</h3>
+          <h3 className="text-2xl md:text-4xl font-semibold text-slate-700">Follow us</h3>
           <div className="mt-5 flex gap-3 text-slate-600">
             <Instagram size={25} className="hover:text-black" />
             <Facebook size={25} className="hover:text-black" />
@@ -19,7 +19,7 @@ export default function Footer() {
         </div>
 
         <div className="col-span-1 sm:col-span-1">
-          <p className="font-display text-4xl font-bold">
+          <p className="font-display text-2xl md:text-4xl font-bold">
             Nova<span className="text-brand-500">Market</span>
           </p>
           <p className="mt-3 max-w-xs text-sm text-slate-700">
@@ -40,7 +40,7 @@ export default function Footer() {
 function FooterCol({ title, links }) {
   return (
     <div>
-      <p className="text-4xl font-semibold text-slate-700">{title}</p>
+      <p className="text-2xl md:text-4xl font-semibold text-slate-700">{title}</p>
       <ul className="mt-4 flex flex-col gap-2.5">
         {links.map((l) => (
           <li key={l}>

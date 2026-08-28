@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../api/axios";
 import AuthLayout from "../components/AuthLayout";
 import { FormField, PasswordField, SubmitButton, FormMessage } from "../components/FormField";
+import axios from "axios";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -14,16 +14,23 @@ export default function SignUp() {
     terms: false,
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+
+    if (error) { setError(""); }
   };
+
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setSuccess("")
 
     if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
       return setError("Please fill in all fields.");
@@ -37,15 +44,53 @@ export default function SignUp() {
     if (!formData.terms) {
       return setError("Please accept the Terms & Conditions.");
     }
+    // =============================
+    // Email Validation Function
+    // =============================
+    const isValidEmail = (email) => {
+      const emailRegex =
+        /^[^\s@]+@[^\s@]+.[^\s@]+$/;
+
+      return emailRegex.test(email);
+    };
+
+  if (!isValidEmail(formData.email)) {
+    return setError("Please enter a valid email address.");
+  }
 
     try {
       setLoading(true);
-      await api.post("/auth/register", formData);
-      navigate("/signin", { state: { justRegistered: true } });
-    } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong. Please try again.");
+      await axios.post(`http://localhost:3000/api/v1/auth/register`, formData)
+
+      setSuccess("Account created. Please check your email to verify your account. And login.")
+
+
+      setTimeout(() => {
+        navigate("/signin",
+          {
+            state: {
+              justRegistered: true
+            }
+          }
+        )
+      }, 1500);
+
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        terms: false,
+      });
+    } catch (error) {
+      let err = error.response.data.message
+      setError(err)
     } finally {
       setLoading(false);
+      setTimeout(() => {
+        setSuccess(""),
+          navigate("/signin")
+      }, 3000);
     }
   };
 
@@ -98,8 +143,18 @@ export default function SignUp() {
           <a href="#" className="font-medium text-ink underline">Privacy Policy</a>.
         </label>
 
-        {error && <FormMessage>{error}</FormMessage>}
-
+        <FormMessage>
+          {error && (
+            <div className=" bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className=" bg-green-100 px-4 py-3 text-sm text-green-600">
+              {success}
+            </div>
+          )}
+        </FormMessage>
         <SubmitButton loading={loading}>Create account</SubmitButton>
       </form>
 

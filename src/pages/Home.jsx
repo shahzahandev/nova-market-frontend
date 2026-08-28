@@ -146,7 +146,7 @@ export default function Home() {
                 
                 {/* Category Name + View All */}
                 <div className="flex flex-col items-center justify-center px-4 py-4 transition-colors duration-500 group-hover:bg-black/10">
-                  <h3 className="font-display text-4xl font-bold capitalize text-gray-900 transition-colors duration-500">
+                  <h3 className="font-display text-2xl md:text-4xl font-bold capitalize text-gray-900 transition-colors duration-500">
                     {cat}
                   </h3>
                   <span className="mt-4 text-sm font-medium text-gray-600 transition-colors duration-500">

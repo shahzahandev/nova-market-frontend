@@ -4,15 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/**
- * Attach to a container; every direct child with [data-reveal] fades/slides
- * up in a staggered sequence as the container scrolls into view.
- *
- * <div ref={ref}>
- *   <div data-reveal>...</div>
- *   <div data-reveal>...</div>
- * </div>
- */
+
 export function useScrollReveal({ y = 24, stagger = 0.08, start = "top 85%" } = {}) {
   const containerRef = useRef(null);
 
