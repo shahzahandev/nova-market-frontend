@@ -209,17 +209,11 @@ export default function SingleProduct() {
                 <div className="flex flex-col">
 
                     <div className="text-center md:text-start">
-
-                        {/* Brand */}
-
                         {product.brand && (
                             <p className="font-mono text-sm uppercase tracking-[0.15em] text-brand-600 sm:text-base md:text-lg">
                                 {product.brand}
                             </p>
                         )}
-
-                        {/* Title */}
-
                         <h1 className="mt-2 font-display text-2xl font-bold leading-tight sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
                             {product.title}
                         </h1>
