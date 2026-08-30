@@ -45,9 +45,7 @@ export default function SignUp() {
     // Email Validation Function
     // =============================
     const isValidEmail = (email) => {
-      const emailRegex =
-        /^[^\s@]+@[^\s@]+.[^\s@]+$/;
-
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return emailRegex.test(email);
     };
 
@@ -77,14 +75,12 @@ export default function SignUp() {
         terms: false,
       });
     } catch (error) {
-      let err = error.response.data.message
-      setError(err)
+    const message =
+    error.response?.data?.message ||
+    "Something went wrong. Please try again.";
+  setError(message);
     } finally {
       setLoading(false);
-      setTimeout(() => {
-        setSuccess(""),
-          navigate("/signin")
-      }, 3000);
     }
   };
 

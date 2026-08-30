@@ -85,7 +85,6 @@ export default function ResetPassword() {
       // Backend API
       // =========================
       const res = await axios.post(`https://nova-market-backend-2.onrender.com/api/v1/auth/resetpassword/${token}`,
-       
         
         {
           newPassword: formData.newPassword,

@@ -118,9 +118,6 @@ export default function SignIn() {
       );
 
 
-
-
-
       localStorage.setItem(
         "account",
         JSON.stringify(res.data.existingUser)
