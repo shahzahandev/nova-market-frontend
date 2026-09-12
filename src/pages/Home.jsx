@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, useLayoutEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
 import { ArrowRight } from "lucide-react";
 import Container from "../components/Container";
 import ProductCard from "../components/ProductCard";
+import HeroSlider from "../components/HeroSlider";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import axios from "axios";
 import About from "../components/About";
@@ -19,27 +20,6 @@ function imageSrc(filename) {
   return `${API_ORIGIN}/upload/${filename}`;
 }
 
-// Always outputs 6 slots. Kom image thakle repeat kore fill kore.
-function buildCubeFaces(images) {
-  const src = (images || []).slice(0, 6).filter(Boolean);
-  if (src.length === 0) return Array(6).fill("");
-  return Array.from({ length: 6 }, (_, i) => src[i % src.length]);
-}
-
-const RETURN_DURATION = 0.8;
-const RANDOM_MIN_DUR = 1.4;
-const RANDOM_MAX_DUR = 2.2;
-
-// Full 6-face cube: front/back/left/right/top/bottom
-const FACE_CONFIG = [
-  { key: "front", transform: (h) => `rotateY(0deg) translateZ(${h}px)`, shade: 0 },
-  { key: "back", transform: (h) => `rotateY(180deg) translateZ(${h}px)`, shade: 0.32 },
-  { key: "right", transform: (h) => `rotateY(90deg) translateZ(${h}px)`, shade: 0.18 },
-  { key: "left", transform: (h) => `rotateY(-90deg) translateZ(${h}px)`, shade: 0.18 },
-  { key: "top", transform: (h) => `rotateX(90deg) translateZ(${h}px)`, shade: 0.1 },
-  { key: "bottom", transform: (h) => `rotateX(-90deg) translateZ(${h}px)`, shade: 0.4 },
-];
-
 export default function Home() {
   const [product, setProduct] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -47,13 +27,7 @@ export default function Home() {
   const categoryRef = useScrollReveal();
   const productRef = useScrollReveal({ stagger: 0.06 });
 
-  const stageRef = useRef(null);
-  const cubeRef = useRef(null);
-  const shadowRef = useRef(null);
-
-  const [half, setHalf] = useState(160);
-
-  // ---- Banner images from API ----
+  // ---- Banner images from API (max 5, enforced in HeroSlider) ----
   const [bannerImages, setBannerImages] = useState([]);
 
   useEffect(() => {
@@ -69,123 +43,6 @@ export default function Home() {
     };
     fetchBanner();
   }, []);
-
-  const faces = buildCubeFaces(bannerImages);
-
-  const rotationRef = useRef({ x: 0, y: 0 });
-  const dragState = useRef({ dragging: false, startX: 0, startY: 0, fromX: 0, fromY: 0 });
-  const autoTweenRef = useRef(null);
-  const isActiveRef = useRef(true);
-
-  useLayoutEffect(() => {
-    const el = stageRef.current;
-    if (!el) return;
-    const update = () => setHalf(el.clientWidth / 2);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const applyRotation = () => {
-    if (cubeRef.current) {
-      gsap.set(cubeRef.current, {
-        rotateX: rotationRef.current.x,
-        rotateY: rotationRef.current.y,
-      });
-    }
-  };
-
-  const setShadowIntensity = (level) => {
-    gsap.to(shadowRef.current, {
-      opacity: level === 0 ? 0.75 : 1,
-      scale: level === 0 ? 1 : 1.22,
-      filter: `blur(${level === 0 ? 60 : 78}px)`,
-      duration: 0.5,
-      ease: "power2.out",
-    });
-  };
-
-  const scheduleRandomRotate = () => {
-    if (!isActiveRef.current) return;
-    const dx = gsap.utils.random(-30, 30);
-    const dy = gsap.utils.random(70, 150) * (Math.random() < 0.5 ? -1 : 1);
-    autoTweenRef.current = gsap.to(rotationRef.current, {
-      x: rotationRef.current.x + dx,
-      y: rotationRef.current.y + dy,
-      duration: gsap.utils.random(RANDOM_MIN_DUR, RANDOM_MAX_DUR),
-      ease: "sine.inOut",
-      onUpdate: applyRotation,
-      onComplete: scheduleRandomRotate,
-    });
-  };
-
-  const stopAutoRotate = () => {
-    if (autoTweenRef.current) {
-      autoTweenRef.current.kill();
-      autoTweenRef.current = null;
-    }
-    gsap.killTweensOf(rotationRef.current);
-  };
-
-  const returnToInitialThenResume = () => {
-    stopAutoRotate();
-    gsap.to(rotationRef.current, {
-      x: 0,
-      y: 0,
-      duration: RETURN_DURATION,
-      ease: "power3.out",
-      onUpdate: applyRotation,
-      onComplete: scheduleRandomRotate,
-    });
-  };
-
-  useEffect(() => {
-    isActiveRef.current = true;
-    scheduleRandomRotate();
-    return () => {
-      isActiveRef.current = false;
-      stopAutoRotate();
-    };
-  }, []);
-
-  const onPointerDown = (e) => {
-    stopAutoRotate();
-    setShadowIntensity(1);
-    dragState.current = {
-      dragging: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      fromX: rotationRef.current.x,
-      fromY: rotationRef.current.y,
-    };
-    window.addEventListener("pointermove", onPointerMove);
-    window.addEventListener("pointerup", onPointerUp);
-  };
-
-  const onPointerMove = (e) => {
-    if (!dragState.current.dragging) return;
-    const dx = e.clientX - dragState.current.startX;
-    const dy = e.clientY - dragState.current.startY;
-    rotationRef.current.y = dragState.current.fromY + dx * 0.5;
-    rotationRef.current.x = dragState.current.fromX - dy * 0.5;
-    applyRotation();
-  };
-
-  const endDrag = () => {
-    if (!dragState.current.dragging) return;
-    dragState.current.dragging = false;
-    window.removeEventListener("pointermove", onPointerMove);
-    window.removeEventListener("pointerup", onPointerUp);
-    setShadowIntensity(0);
-    returnToInitialThenResume();
-  };
-
-  const onPointerUp = () => endDrag();
-  const onPointerLeave = () => endDrag();
-  const onPointerEnter = () => {
-    if (!dragState.current.dragging) setShadowIntensity(1);
-  };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -254,58 +111,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Image content — 50%, interactive full 6-face 3D cube */}
+          {/* Image content — 50%, GSAP-powered auto-sliding banner */}
           <div className="flex justify-center">
-            <div
-              ref={stageRef}
-              className="relative w-40 aspect-square cursor-grab touch-none select-none active:cursor-grabbing sm:w-52 md:w-60 lg:w-64 xl:w-72"
-              style={{ perspective: 1400 }}
-              onPointerDown={onPointerDown}
-              onPointerEnter={onPointerEnter}
-              onPointerLeave={onPointerLeave}
-            >
-              <div
-                ref={shadowRef}
-                className="pointer-events-none absolute -inset-10 rounded-full sm:-inset-14 lg:-inset-16"
-                style={{
-                  opacity: 0.75,
-                  filter: "blur(48px)",
-                  background:
-                    "conic-gradient(from 120deg, rgba(124,58,237,0.75), rgba(6,182,212,0.7), rgba(244,63,94,0.7), rgba(245,158,11,0.7), rgba(124,58,237,0.75))",
-                }}
-              />
-
-              <div className="relative h-full w-full" style={{ transformStyle: "preserve-3d" }}>
-                <div ref={cubeRef} className="absolute inset-0" style={{ transformStyle: "preserve-3d" }}>
-                  {FACE_CONFIG.map((face, i) => (
-                    <div
-                      key={face.key}
-                      className="absolute inset-0 overflow-hidden border border-white/10"
-                      style={{
-                        transformStyle: "preserve-3d",
-                        transform: face.transform(half),
-                        backfaceVisibility: "hidden",
-                      }}
-                    >
-                      {faces[i] ? (
-                        <img
-                          src={faces[i]}
-                          alt=""
-                          draggable={false}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-white/5" />
-                      )}
-                      <div
-                        className="pointer-events-none absolute inset-0"
-                        style={{ backgroundColor: `rgba(0,0,0,${face.shade})` }}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <HeroSlider images={bannerImages} />
           </div>
         </Container>
       </section>

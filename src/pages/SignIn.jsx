@@ -38,15 +38,15 @@ export default function SignIn() {
     };
 
     // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required.";
-    } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-        formData.email.trim()
-      )
-    ) {
-      newErrors.email = "Please enter a valid email address.";
-    }
+    // if (!formData.email.trim()) {
+    //   newErrors.email = "Email is required.";
+    // } else if (
+    //   !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    //     formData.email.trim()
+    //   )
+    // ) {
+    //   newErrors.email = "Please enter a valid email address.";
+    // }
 
     // Password validation
     if (!formData.password) {
