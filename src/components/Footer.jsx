@@ -3,7 +3,7 @@ import { Instagram, Facebook, Twitter } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-slate-100 text-black">
+    <footer className="bg-slate-100 text-black text-center">
       <Container className="grid grid-cols-1 gap-10 py-16 sm:grid-cols-3">
         <FooterCol title="Information" links={[
           "About", "Contact Us", "Shipping", "Careers", "Terms", "Privacy Policy", "FAQ",
@@ -11,7 +11,7 @@ export default function Footer() {
 
         <div>
           <h3 className="text-2xl md:text-4xl font-semibold text-slate-700">Follow us</h3>
-          <div className="mt-5 flex gap-3 text-slate-600">
+          <div className="mt-5 flex gap-3 text-slate-600 justify-center">
             <Instagram size={25} className="hover:text-black" />
             <Facebook size={25} className="hover:text-black" />
             <Twitter size={25} className="hover:text-black" />
@@ -22,9 +22,21 @@ export default function Footer() {
           <p className="font-display text-2xl md:text-4xl font-bold">
             Nova<span className="text-brand-500">Market</span>
           </p>
-          <p className="mt-3 max-w-xs text-sm text-slate-700">
-            Thoughtfully sourced goods, shipped fast, backed by real people.
+              <p className="font-display text-lg md:text-2xl font-bold mt-2">
+            Stay Connected
+
           </p>
+          <p className="mt-3 max-w-xs text-sm text-slate-700 mx-auto">
+            Head Office:  Read-4, Momtaz Plaza, Dhanmondi, Dhaka 1000
+          </p>
+           <p className="font-display text-lg md:text-2xl font-bold mt-2">
+            Email
+          </p>
+              <p className="mt-3 max-w-xs text-sm text-slate-700 mx-auto">
+                novamarket@gmail.com
+          </p>
+     
+
         </div>
       </Container>
 
