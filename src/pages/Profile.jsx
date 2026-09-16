@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { User, Package, LogOut } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { User, Package, LogOut, Heart, ShoppingBag, X } from "lucide-react";
 import Container from "../components/Container";
 import {
   FormField,
@@ -8,10 +8,30 @@ import {
   FormMessage,
 } from "../components/FormField";
 import { useAuth } from "../context/AuthContext";
+import { useWishlist } from "../context/WishlistContext";
+import { useCart } from "../context/CartContext";
 import axios from "axios";
+
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
+
+function imageSrc(url) {
+  if (!url) return "";
+  return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
+}
+
+function getMainImage(item) {
+  if (!item?.images?.length) return null;
+
+  const mainImage = item.images.find(
+    (img) => img.isMain === true || img.isMain === "true"
+  );
+
+  return mainImage || item.images[0];
+}
 
 const NAV = [
   { key: "profile", label: "Profile", icon: User },
+  { key: "wishlist", label: "Wishlist", icon: Heart },
   { key: "orders", label: "Orders", icon: Package },
   { key: "logout", label: "Logout", icon: LogOut },
 ];
@@ -41,6 +61,8 @@ const POSTAL_CODE_REGEX = /^\d{4}$/;
 export default function Profile() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { wishlistItems, removeItem: removeWishlistItem } = useWishlist();
+  const { addToCart } = useCart();
 
   const [active, setActive] = useState("profile");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -407,7 +429,7 @@ export default function Profile() {
             Sidebar
         ========================= */}
         <aside className="h-fit rounded-2xl border border-ink/10 p-3">
-          <nav className="flex gap-2 overflow-x-auto md:flex-col">
+          <nav className="grid md:flex grid-cols-2 gap-2 overflow-x-auto md:flex-col">
             {NAV.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -415,7 +437,7 @@ export default function Profile() {
                 onClick={() => handleNavClick(key)}
                 className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                   key === "logout"
-                    ? "text-red-600 hover:bg-red-50"
+                    ? "text-red-600 hover:bg-red-100 bg-red-50"
                     : active === key
                     ? "bg-brand-400 text-white"
                     : "text-ink/70 hover:bg-mist"
@@ -423,6 +445,17 @@ export default function Profile() {
               >
                 <Icon size={18} />
                 {label}
+                {key === "wishlist" && wishlistItems.length > 0 && (
+                  <span
+                    className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      active === key
+                        ? "bg-white/20 text-white"
+                        : "bg-brand-500 text-white"
+                    }`}
+                  >
+                    {wishlistItems.length}
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -584,6 +617,99 @@ export default function Profile() {
                     </SubmitButton>
                   </div>
                 </form>
+              )}
+            </>
+          )}
+
+          {/* =========================
+              Wishlist
+          ========================= */}
+          {active === "wishlist" && (
+            <>
+              <h1 className="font-display text-xl font-bold">
+                Your wishlist
+              </h1>
+
+              <p className="mt-1 text-sm text-ink/60">
+                Products you've saved for later.
+              </p>
+
+              {wishlistItems.length === 0 ? (
+                <div className="mt-6 rounded-xl border border-dashed border-ink/15 p-10 text-center text-sm text-ink/40">
+                  No items in your wishlist yet.
+                </div>
+              ) : (
+                <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {wishlistItems.map((item) => {
+                    const finalPrice = item.discountPrice || item.price;
+                    const mainImage = getMainImage(item);
+
+                    return (
+                      <div
+                        key={item._id}
+                        className="flex flex-col gap-4 rounded-2xl border border-ink/10 p-4"
+                      >
+                        <div className="flex gap-4">
+                          <Link
+                            to={`/products/${item._id}`}
+                            className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-mist"
+                          >
+                            {mainImage?.url ? (
+                              <img
+                                src={imageSrc(mainImage.url)}
+                                alt={item.title}
+                                className="h-full w-full object-cover"
+                              />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-[10px] text-ink/30">
+                                No image
+                              </div>
+                            )}
+                          </Link>
+
+                          <div className="flex flex-1 flex-col justify-between">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <Link
+                                  to={`/products/${item._id}`}
+                                  className="line-clamp-1 font-medium hover:underline"
+                                >
+                                  {item.title}
+                                </Link>
+                                <div className="mt-1 flex items-center gap-2 font-mono text-sm">
+                                  <span className="text-ink">
+                                    ৳{finalPrice}
+                                  </span>
+                                  {item.discountPrice && (
+                                    <span className="text-ink/40 line-through">
+                                      ৳{item.price}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+
+                              <button
+                                onClick={() => removeWishlistItem(item._id)}
+                                className="text-ink/30 hover:text-red-600"
+                                aria-label="Remove from wishlist"
+                              >
+                                <X size={18} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => addToCart(item)}
+                          className="flex h-10 w-full items-center justify-center gap-2 rounded-full bg-ink text-sm font-semibold text-white hover:bg-ink/90"
+                        >
+                          <ShoppingBag size={15} />
+                          Add to cart
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </>
           )}

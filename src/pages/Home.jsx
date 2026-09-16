@@ -207,26 +207,15 @@ export default function Home() {
     getCategories();
   }, []);
 
-  // ============================================================
-  // Render
-  // ============================================================
 
   return (
     <div>
-      {/* ============================================================
-          HERO
-      ============================================================ */}
-
+      {/* ======= HERO ========== */}
       <section
         ref={heroRef}
         className="relative overflow-hidden bg-ink text-white"
       >
         <Container className="grid items-center gap-10 py-14 sm:py-16 lg:grid-cols-2 lg:py-8">
-
-          {/* ======================================================
-              TEXT
-          ====================================================== */}
-
           <div>
             <p
               data-hero-eyebrow
@@ -305,10 +294,7 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ============================================================
-          FEATURED PRODUCTS
-      ============================================================ */}
-
+      {/* ========= FEATURED PRODUCTS ============= */}
       <section className="py-16">
         <Container>
           <div className="mb-8 flex items-end justify-between">
@@ -344,10 +330,7 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ============================================================
-          CATEGORIES
-      ============================================================ */}
-
+      {/* ========== CATEGORIES ============== */}
       <section className="py-16">
         <Container>
           <div className="mb-10">
@@ -362,7 +345,7 @@ export default function Home() {
 
           <div
             ref={categoryRef}
-            className="grid grid-cols-1 gap-6 sm:grid-cols-4"
+            className="grid grid-cols-4 gap-2 sm:grid-cols-4"
           >
             {categories.map((cat) => (
               <Link
@@ -372,11 +355,11 @@ export default function Home() {
                 className="group overflow-hidden rounded-lg bg-gray-100 shadow-sm"
               >
                 <div className="flex flex-col items-center justify-center px-4 py-2 transition-colors duration-500 group-hover:bg-black/10">
-                  <h3 className="font-display text-2xl font-bold capitalize text-gray-900 transition-colors duration-500 md:text-2xl">
+                  <h3 className="font-display font-bold capitalize text-gray-900 transition-colors duration-500 md:text-2xl">
                     {cat}
                   </h3>
 
-                  <span className=" text-sm font-medium text-gray-600 transition-colors duration-500">
+                  <span className="text-[10px] md:text-sm font-medium text-gray-600 transition-colors duration-500">
                     View All
                   </span>
                 </div>
@@ -386,10 +369,7 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ============================================================
-          ABOUT
-      ============================================================ */}
-
+      {/* ============  ABOUT ================ */}
       <About />
     </div>
   );

@@ -3,9 +3,26 @@ import { Minus, Plus, X } from "lucide-react";
 import Container from "../components/Container";
 import { useCart } from "../context/CartContext";
 
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
+
+function imageSrc(url) {
+  if (!url) return "";
+  return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
+}
+
+function getMainImage(item) {
+  if (!item?.images?.length) return null;
+
+  const mainImage = item.images.find(
+    (img) => img.isMain === true || img.isMain === "true"
+  );
+
+  return mainImage || item.images[0];
+}
+
 export default function Cart() {
   const { cartItems, increaseQuantity, decreaseQuantity, removeItem, subtotal, clearCart } = useCart();
-  const delivery = cartItems.length > 0 ? 6 : 0;
+  const delivery = cartItems.length > 0 ? 60 : 0;
   const total = subtotal + delivery;
 
   if (cartItems.length === 0) {
@@ -36,12 +53,26 @@ export default function Cart() {
         <div className="flex flex-col gap-4">
           {cartItems.map((item) => {
             const finalPrice = item.discountPrice || item.price;
+            const mainImage = getMainImage(item);
+
             return (
               <div
                 key={item._id}
                 className="flex gap-4 rounded-2xl border border-ink/10 p-4"
               >
-                <div className="h-24 w-24 shrink-0 rounded-xl bg-mist" />
+                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-mist">
+                  {mainImage?.url ? (
+                    <img
+                      src={imageSrc(mainImage.url)}
+                      alt={item.title}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[10px] text-ink/30">
+                      No image
+                    </div>
+                  )}
+                </div>
                 <div className="flex flex-1 flex-col justify-between">
                   <div className="flex items-start justify-between gap-3">
                     <div>

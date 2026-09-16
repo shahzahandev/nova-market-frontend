@@ -5,13 +5,14 @@ import {
     Truck,
     ShieldCheck,
     RotateCcw,
+    Heart,
 } from "lucide-react";
 import axios from "axios";
 import Container from "../components/Container";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 
 const MAX_THUMBNAILS = 5;
-
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
@@ -29,7 +30,6 @@ function imageSrc(url) {
 
 function getDateOnly(dateValue) {
     if (!dateValue) return null;
-
     const date = new Date(dateValue);
 
     if (Number.isNaN(date.getTime())) {
@@ -47,6 +47,7 @@ export default function ProductDetails() {
     const { id } = useParams();
     const location = useLocation();
     const { addToCart } = useCart();
+    const { toggleItem, isInWishlist } = useWishlist();
 
     const [product, setProduct] = useState(
         location.state?.product || null
@@ -184,6 +185,16 @@ export default function ProductDetails() {
         }, 1800);
     };
 
+    // =====================================================
+    // Wishlist Toggle
+    // =====================================================
+
+    const saved = isInWishlist(product._id);
+
+    const handleToggleWishlist = () => {
+        toggleItem(product);
+    };
+
     return (
         <Container className="py-6 sm:py-8 md:py-10">
 
@@ -232,7 +243,29 @@ export default function ProductDetails() {
                         </div>
                     )}
 
-                    <div className="order-1 flex-1">
+                    <div className="order-1 relative flex-1">
+
+                        {/* Wishlist Heart Icon */}
+
+                        <button
+                            type="button"
+                            onClick={handleToggleWishlist}
+                            aria-label={
+                                saved
+                                    ? "Remove from wishlist"
+                                    : "Add to wishlist"
+                            }
+                            className={`absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur transition-colors sm:h-11 sm:w-11 ${
+                                saved
+                                    ? "bg-red-50 text-red-600"
+                                    : "border-ink/10 bg-white/80 text-ink/40 hover:text-red-600"
+                            }`}
+                        >
+                            <Heart
+                                size={25}
+                                fill={saved ? "currentColor" : "none"}
+                            />
+                        </button>
 
                         <div className="aspect-square w-full overflow-hidden rounded-2xl bg-mist sm:rounded-3xl">
 
@@ -334,7 +367,7 @@ export default function ProductDetails() {
                             : "Out of stock"}
                     </p>
 
-                    {/* Add To Cart */}
+                    {/* Add To Cart + Wishlist */}
 
                     <div className="mt-6 flex gap-3">
 
@@ -348,6 +381,26 @@ export default function ProductDetails() {
                             {added
                                 ? "Added to cart"
                                 : "Add to cart"}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleToggleWishlist}
+                            aria-label={
+                                saved
+                                    ? "Remove from wishlist"
+                                    : "Add to wishlist"
+                            }
+                            className={`flex items-center justify-center border px-5 transition-colors ${
+                                saved
+                                    ? " bg-red-50 text-red-600"
+                                    : "border-ink/10 text-ink/60 hover:text-red-600"
+                            }`}
+                        >
+                            <Heart
+                                size={40}
+                                fill={saved ? "currentColor" : "none"}
+                            />
                         </button>
 
                     </div>

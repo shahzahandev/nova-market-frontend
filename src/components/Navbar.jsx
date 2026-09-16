@@ -5,7 +5,6 @@ import {
   Search,
   ShoppingBag,
   Heart,
-  ArrowLeftRight,
   User,
   Menu,
   X,
@@ -20,6 +19,7 @@ import {
 
 import Container from "./Container";
 import { useCart } from "../context/CartContext";
+import { useWishlist } from "../context/WishlistContext";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
@@ -32,20 +32,19 @@ export default function Navbar() {
   const [open, setOpen] = useState(false); // mobile drawer
   const [mobileTab, setMobileTab] = useState("categories"); // categories | menu | more
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-
   const [scrolled, setScrolled] = useState(false);
-
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [query, setQuery] = useState("");
-
   const [accountInfo, setAccountInfo] = useState(null);
 
-  // Wishlist / Compare — wire these up to your real context when ready
-  const wishlistCount = 0;
+  // Compare — wire this up to your real context when ready
   const compareCount = 0;
 
   const { cartItems } = useCart();
+  const { wishlistItems } = useWishlist();
+  const wishlistCount = wishlistItems.length;
+
   const navigate = useNavigate();
 
   // =========================
@@ -53,17 +52,13 @@ export default function Navbar() {
   // =========================
   const topBarRef = useRef(null);
   const topBarHeightRef = useRef(0);
-
   const categoryRowRef = useRef(null);
   const categoryRowHeightRef = useRef(0);
-
   const categoryScrollRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
-
   const mobileDefaultRef = useRef(null);
   const mobileSearchRowRef = useRef(null);
-
   const drawerRef = useRef(null);
   const overlayRef = useRef(null);
 
@@ -264,15 +259,15 @@ export default function Navbar() {
 
   const searchResults = normalizedQuery
     ? products
-        .filter((product) => product.title?.toLowerCase().includes(normalizedQuery))
-        .sort((a, b) => {
-          const aStarts = a.title.toLowerCase().startsWith(normalizedQuery);
-          const bStarts = b.title.toLowerCase().startsWith(normalizedQuery);
-          if (aStarts && !bStarts) return -1;
-          if (!aStarts && bStarts) return 1;
-          return 0;
-        })
-        .slice(0, 6)
+      .filter((product) => product.title?.toLowerCase().includes(normalizedQuery))
+      .sort((a, b) => {
+        const aStarts = a.title.toLowerCase().startsWith(normalizedQuery);
+        const bStarts = b.title.toLowerCase().startsWith(normalizedQuery);
+        if (aStarts && !bStarts) return -1;
+        if (!aStarts && bStarts) return 1;
+        return 0;
+      })
+      .slice(0, 6)
     : [];
 
   const closeSearch = () => setQuery("");
@@ -462,11 +457,11 @@ export default function Navbar() {
         {/* TOP UTILITY BAR — GSAP collapses on scroll */}
         <div ref={topBarRef} className="overflow-hidden border-b border-ink/5">
           <Container className="flex h-10 items-center justify-between text-xs text-ink/60">
-            <span className="font-medium">Connecting Home...</span>
+            <span className="font-medium">Happy shopping...</span>
 
             <div className="flex items-center gap-5">
-              
-             <a   href="mailto:support@novamarket.com"
+
+              <a href="mailto:support@novamarket.com"
                 className="flex items-center gap-1.5 hover:text-ink"
               >
                 <Mail size={13} />
@@ -517,9 +512,11 @@ export default function Navbar() {
             <div className="flex shrink-0 items-center gap-5">
               <Link to="/wishlist" className="relative text-ink/70 hover:text-ink">
                 <Heart size={20} />
-                <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
-                  {wishlistCount}
-                </span>
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
 
               <Link to="/cart" className="relative text-ink/70 hover:text-ink">
@@ -537,12 +534,14 @@ export default function Navbar() {
         {/* CATEGORY ROW — GSAP collapses on scroll */}
         <div ref={categoryRowRef} className="overflow-hidden border-t border-ink/5">
           <Container className="flex items-center gap-4 py-1">
-            <button
-              type="button"
-              className="flex shrink-0 items-center gap-2 bg-brand-700 px-5 py-3.5 text-sm font-semibold rounded-lg text-white bg-brand-600"
-            >
-              ALL CATEGORIES
-            </button>
+            <Link to="/products">
+              <button
+                type="button"
+                className="flex shrink-0 items-center gap-2 bg-brand-700 px-5 py-1.5 text-sm font-semibold rounded-lg text-white bg-brand-500"
+              >
+                ALL CATEGORIES
+              </button>
+            </Link>
 
             {canScrollLeft && (
               <button
@@ -645,9 +644,8 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileTab("categories")}
-            className={`flex-1 py-2 text-sm font-semibold transition ${
-              mobileTab === "categories" ? "bg-brand-500 text-ink rounded-lg" : "text-ink/50"
-            }`}
+            className={`flex-1 py-2 text-sm font-semibold transition ${mobileTab === "categories" ? "bg-brand-500 text-ink rounded-lg" : "text-ink/50"
+              }`}
           >
             Categories
           </button>
@@ -655,9 +653,8 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileTab("menu")}
-            className={`flex-1 py-2 text-sm font-semibold transition ${
-              mobileTab === "menu" ? "bg-brand-500 text-ink rounded-lg" : "text-ink/50"
-            }`}
+            className={`flex-1 py-2 text-sm font-semibold transition ${mobileTab === "menu" ? "bg-brand-500 text-ink rounded-lg" : "text-ink/50"
+              }`}
           >
             Menu
           </button>
@@ -665,9 +662,8 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileTab("more")}
-            className={`flex-1 py-2 text-sm font-semibold transition ${
-              mobileTab === "more" ? "bg-brand-500 text-ink rounded-lg" : "text-ink/50"
-            }`}
+            className={`flex-1 py-2 text-sm font-semibold transition ${mobileTab === "more" ? "bg-brand-500 text-ink rounded-lg" : "text-ink/50"
+              }`}
           >
             More
           </button>
