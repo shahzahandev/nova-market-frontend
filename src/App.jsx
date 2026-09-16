@@ -18,7 +18,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import EmailVerify from "./pages/EmailVerify";
 import ProductDetails from "./pages/ProductDetails";
-import Wishlist from "./pages/wishlist";
+import Wishlist from "./pages/Wishlist";
 
 function StoreLayout() {
   return (

@@ -96,7 +96,7 @@ export default function HeroSlider({ images = [] }) {
   return (
     <div
       ref={containerRef}
-      className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl"
+      className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-ink"
     >
       {slides.map((src, i) => (
         <img
@@ -105,7 +105,7 @@ export default function HeroSlider({ images = [] }) {
           src={src}
           alt=""
           draggable={false}
-          className="absolute inset-0 h-full w-full object-cover will-change-transform"
+          className="absolute inset-0 h-full w-full object-contain will-change-transform"
         />
       ))}
 
