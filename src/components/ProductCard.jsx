@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
@@ -32,6 +33,13 @@ function getDateOnly(dateValue) {
 }
 
 export default function ProductCard({ product }) {
+  // =====================================================
+  // Image Load State
+  // =====================================================
+
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+
   // =====================================================
   // Main Image
   // =====================================================
@@ -129,12 +137,25 @@ export default function ProductCard({ product }) {
 
         <div className="relative z-0 aspect-square overflow-hidden bg-mist">
 
-          {mainImage?.url ? (
-            <img
-              src={imageSrc(mainImage.url)}
-              alt={product.title}
-              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-            />
+          {mainImage?.url && !imageError ? (
+            <>
+              {/* Skeleton shown until image finishes loading */}
+              {!imageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center bg-mist">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-ink/10 border-t-ink/40" />
+                </div>
+              )}
+
+              <img
+                src={imageSrc(mainImage.url)}
+                alt={product.title}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageError(true)}
+                className={`h-full w-full object-cover transition-all duration-500 ease-out group-hover:scale-105 ${
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+              />
+            </>
           ) : (
             <div className="flex h-full items-center justify-center text-ink/20">
               No image
