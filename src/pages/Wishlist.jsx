@@ -1,8 +1,8 @@
-import { Link } from "react-router-dom";
-import { Heart, ShoppingBag, X } from "lucide-react";
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Heart, X } from "lucide-react";
 import Container from "../components/Container";
 import { useWishlist } from "../context/WishlistContext";
-import { useCart } from "../context/CartContext";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
@@ -22,8 +22,48 @@ function getMainImage(item) {
 }
 
 export default function Wishlist() {
-  const { wishlistItems, removeItem, clearWishlist } = useWishlist();
-  const { addToCart } = useCart();
+  const {
+    wishlistItems,
+    removeItem,
+    clearWishlist,
+    isLoggedIn,
+    loading,
+    error,
+    refreshWishlist,
+  } = useWishlist();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!isLoggedIn) {
+      navigate("/signin");
+    }
+  }, [isLoggedIn, navigate]);
+
+  if (!isLoggedIn) {
+    return null; // redirecting
+  }
+
+  if (loading) {
+    return (
+      <Container className="py-24 text-center text-sm text-ink/40">
+        Loading your wishlist...
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container className="flex flex-col items-center justify-center py-24 text-center">
+        <p className="text-sm text-red-600">{error}</p>
+        <button
+          type="button"
+          onClick={refreshWishlist}
+          className="mt-4 flex h-11 items-center rounded-full bg-ink px-6 text-sm font-semibold text-white hover:bg-ink/90"
+        >
+          Try again
+        </button>
+      </Container>
+    );
+  }
 
   if (wishlistItems.length === 0) {
     return (
@@ -49,55 +89,42 @@ export default function Wishlist() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {wishlistItems.map((item) => {
-          const finalPrice = item.discountPrice || item.price;
           const mainImage = getMainImage(item);
 
           return (
             <div
               key={item._id}
-              className="flex flex-col gap-4 rounded-2xl border border-ink/10 p-4"
+              className="group relative flex flex-col gap-3 rounded-2xl border border-ink/10 p-3"
             >
-              <div className="flex gap-4">
-                <div className="h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-mist">
+              <button
+                type="button"
+                onClick={() => removeItem(item._id)}
+                aria-label="Remove from wishlist"
+                className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-ink/40 backdrop-blur hover:text-red-600"
+              >
+                <X size={16} />
+              </button>
+              <Link to={`/products/${item._id}`} className="flex flex-col gap-3">
+                <div className="aspect-square w-full overflow-hidden rounded-xl bg-mist">
                   {mainImage?.url ? (
                     <img
                       src={imageSrc(mainImage.url)}
                       alt={item.title}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover transition duration-200 group-hover:scale-105"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] text-ink/30">
+                    <div className="flex h-full w-full items-center justify-center text-xs text-ink/30">
                       No image
                     </div>
                   )}
                 </div>
-                <div className="flex flex-1 flex-col justify-between">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium">{item.title}</p>
-                      <div className="mt-1 flex items-center gap-2 font-mono text-sm">
-                        <span className="text-ink">${finalPrice}</span>
-                        {item.discountPrice && (
-                          <span className="text-ink/40 line-through">${item.price}</span>
-                        )}
-                      </div>
-                    </div>
-                    <button onClick={() => removeItem(item._id)} className="text-ink/30 hover:text-red-600">
-                      <X size={18} />
-                    </button>
-                  </div>
-                </div>
-              </div>
 
-              <button
-                onClick={() => addToCart(item)}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-full bg-ink text-sm font-semibold text-white hover:bg-ink/90"
-              >
-                <ShoppingBag size={16} />
-                Add to cart
-              </button>
+                <p className="line-clamp-2 text-sm font-medium text-ink">
+                  {item.title}
+                </p>
+              </Link>
             </div>
           );
         })}

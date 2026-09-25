@@ -17,16 +17,9 @@ const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
     if (!url) return "";
-
-    return url.startsWith("http")
-        ? url
-        : `${API_ORIGIN}${url}`;
+    return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
 }
 
-// =====================================================
-// Convert date to local date only
-// Time will be ignored
-// =====================================================
 
 function getDateOnly(dateValue) {
     if (!dateValue) return null;
@@ -48,18 +41,13 @@ export default function ProductDetails() {
     const location = useLocation();
     const { addToCart } = useCart();
     const { toggleItem, isInWishlist } = useWishlist();
-
     const [product, setProduct] = useState(
         location.state?.product || null
     );
-
     const [activeImage, setActiveImage] = useState(0);
     const [added, setAdded] = useState(false);
 
-    // =====================================================
     // Fetch Product
-    // =====================================================
-
     useEffect(() => {
         if (product) return;
 
@@ -78,10 +66,7 @@ export default function ProductDetails() {
         getProduct();
     }, [id, product]);
 
-    // =====================================================
     // Set Main Image
-    // =====================================================
-
     useEffect(() => {
         if (!product?.images?.length) {
             setActiveImage(0);
@@ -99,10 +84,7 @@ export default function ProductDetails() {
         );
     }, [product]);
 
-    // =====================================================
     // Loading
-    // =====================================================
-
     if (!product) {
         return (
             <p className="py-20 text-center text-sm text-ink/40">
@@ -111,10 +93,7 @@ export default function ProductDetails() {
         );
     }
 
-    // =====================================================
     // Discount Date Logic
-    // =====================================================
-
     const today = getDateOnly(new Date());
 
     const startDate = getDateOnly(
@@ -199,16 +178,9 @@ export default function ProductDetails() {
         <Container className="py-6 sm:py-8 md:py-10">
 
             <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
-
-                {/* =================================================
-                    Product Images
-                ================================================= */}
-
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-5">
-
                     {visibleImages.length > 1 && (
                         <div className="order-2 flex w-full gap-3 overflow-x-auto pb-1 md:order-1 md:w-20 md:flex-col md:overflow-hidden md:pb-0">
-
                             {visibleImages.map((img, i) => (
                                 <button
                                     key={img._id || i}
@@ -246,7 +218,6 @@ export default function ProductDetails() {
                     <div className="order-1 relative flex-1">
 
                         {/* Wishlist Heart Icon */}
-
                         <button
                             type="button"
                             onClick={handleToggleWishlist}

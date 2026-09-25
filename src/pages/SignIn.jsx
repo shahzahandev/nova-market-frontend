@@ -8,10 +8,12 @@ import {
   SubmitButton,
   FormMessage,
 } from "../components/FormField";
+import { useAuth } from "../context/AuthContext";
 
 export default function SignIn() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { login } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -79,13 +81,11 @@ export default function SignIn() {
       [name]: value,
     }));
 
-    // ওই input-এর error remove হবে
     setErrors((prev) => ({
       ...prev,
       [name]: "",
     }));
 
-    // API error / success message clear হবে
     setError("");
     setSuccess("");
   };
@@ -107,7 +107,6 @@ export default function SignIn() {
 
     try {
       setLoading(true);
-
       const res = await axios.post("https://nova-market-backend-2.onrender.com/api/v1/auth/login",
         formData
       );
@@ -117,15 +116,9 @@ export default function SignIn() {
         res.data.existingUser
       );
 
-
-      localStorage.setItem(
-        "account",
-        JSON.stringify(res.data.existingUser)
-      );
-
-      window.dispatchEvent(
-        new Event("login")
-      );
+      // Goes through AuthContext now, so localStorage + the "login" event
+      // (which WishlistContext listens for) are handled in one place.
+      login(res.data.existingUser);
 
       // Success message
       setSuccess(
@@ -139,17 +132,9 @@ export default function SignIn() {
       }, 1000);
 
     } catch (err) {
-      console.error(
-        "Login Error:",
-        err
-      );
-
-      const errorMessage =
-        err?.response?.data?.message ||
-        "Invalid email or password.";
-
+      console.error("Login Error:", err );
+      const errorMessage = err?.response?.data?.message || "Invalid email or password.";
       setError(errorMessage);
-
     } finally {
       setLoading(false);
     }

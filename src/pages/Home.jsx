@@ -9,33 +9,21 @@ import { useScrollReveal } from "../hooks/useScrollReveal";
 import axios from "axios";
 import About from "../components/About";
 
-const API_ORIGIN =
-  "https://nova-market-backend-2.onrender.com";
+const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
-const GET_HERO_SLIDER_URL =
-  `${API_ORIGIN}/api/v1/banner/getHeroSlider`;
+const GET_HERO_SLIDER_URL = `${API_ORIGIN}/api/v1/banner/getHeroSlider`;
 
 export default function Home() {
   const [product, setProduct] = useState([]);
   const [categories, setCategories] = useState([]);
-
   const heroRef = useRef(null);
-
   const categoryRef = useScrollReveal();
-  const productRef = useScrollReveal({
-    stagger: 0.06,
-  });
+  const productRef = useScrollReveal({stagger: 0.06,});
 
-  // ============================================================
   // Banner images
-  // ============================================================
-
   const [bannerImages, setBannerImages] = useState([]);
 
-  // ============================================================
   // Fetch Banner
-  // ============================================================
-
   useEffect(() => {
     const fetchBanner = async () => {
       try {
@@ -45,19 +33,6 @@ export default function Home() {
 
         const images =
           response.data?.data?.images || [];
-
-        /*
-        |--------------------------------------------------------------------------
-        | New Cloudinary structure
-        |
-        | [
-        |   {
-        |     url: "...",
-        |     public_id: "..."
-        |   }
-        | ]
-        |--------------------------------------------------------------------------
-        */
 
         const imageUrls = images
           .map((image) => {

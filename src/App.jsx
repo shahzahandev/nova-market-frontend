@@ -36,8 +36,9 @@ export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
-        <WishlistProvider>
-          <BrowserRouter>
+
+        <BrowserRouter>
+          <WishlistProvider>
             <Routes>
               <Route element={<StoreLayout />}>
                 <Route path="/" element={<Home />} />
@@ -46,9 +47,8 @@ export default function App() {
                 <Route path="/products/:id" element={<SingleProduct />} />
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/about" element={<About/>}/>
-                <Route path="/wishlist" element={<Wishlist/>}/>
-
+                <Route path="/about" element={<About />} />
+                <Route path="/wishlist" element={<Wishlist />} />
               </Route>
 
               <Route path="/signup" element={<SignUp />} />
@@ -57,8 +57,8 @@ export default function App() {
               <Route path="/resetpassword/:token" element={<ResetPassword />} />
               <Route path="/verifyemail/:token" element={<EmailVerify />} />
             </Routes>
-          </BrowserRouter>
-        </WishlistProvider>
+          </WishlistProvider>
+        </BrowserRouter>
       </CartProvider>
     </AuthProvider>
   );

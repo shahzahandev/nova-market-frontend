@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Heart } from "lucide-react";
 import Container from "../components/Container";
-import { useWishlist } from "../context/WishlistContext";
 import axios from "axios";
 
 const MAX_THUMBNAILS = 5;
@@ -12,9 +10,7 @@ const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 function imageSrc(url) {
     if (!url) return "";
 
-    return url.startsWith("http")
-        ? url
-        : `${API_ORIGIN}${url}`;
+    return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
 }
 
 function getDateOnly(dateValue) {
@@ -36,8 +32,6 @@ function getDateOnly(dateValue) {
 export default function SingleProduct() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { toggleItem, isInWishlist } = useWishlist();
-
     const [product, setProduct] = useState(null);
     const [activeImage, setActiveImage] = useState(0);
 
@@ -51,13 +45,9 @@ export default function SingleProduct() {
 
                 setProduct(res.data.data);
             } catch (error) {
-                console.log(
-                    "Product fetch error:",
-                    error
-                );
+                console.log( "Product fetch error:", error );
             }
         }
-
         getProduct();
     }, [id]);
 
@@ -98,13 +88,9 @@ export default function SingleProduct() {
 
     const today = getDateOnly(new Date());
 
-    const startDate = getDateOnly(
-        product.discountStartDate
-    );
+    const startDate = getDateOnly( product.discountStartDate );
 
-    const endDate = getDateOnly(
-        product.discountEndDate
-    );
+    const endDate = getDateOnly( product.discountEndDate );
 
     const discountStarted =
         startDate &&
@@ -116,10 +102,7 @@ export default function SingleProduct() {
         today &&
         today <= endDate;
 
-    // =====================================================
     // Active Discount
-    // =====================================================
-
     const hasDiscount =
         Number(product.discountPrice) <
             Number(product.price) &&
@@ -136,19 +119,8 @@ export default function SingleProduct() {
           )
         : 0;
 
-    // =====================================================
-    // Wishlist Toggle
-    // =====================================================
-
-    const saved = isInWishlist(product._id);
-
-    const handleToggleWishlist = () => {
-        toggleItem(product);
-    };
-
     return (
         <Container className="py-6 sm:py-8 md:py-10">
-
             <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-5">
                     {visibleImages.length > 1 && (
@@ -196,33 +168,7 @@ export default function SingleProduct() {
                     )}
 
                     <div className="order-1 relative flex-1">
-
-                        {/* =================================================
-                            Wishlist Icon
-                        ================================================= */}
-
-                        <button
-                            type="button"
-                            onClick={handleToggleWishlist}
-                            aria-label={
-                                saved
-                                    ? "Remove from wishlist"
-                                    : "Add to wishlist"
-                            }
-                            className={`absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur transition-colors sm:h-11 sm:w-11 ${
-                                saved
-                                    ? " bg-red-50 text-red-600"
-                                    : "border-ink/10 bg-white/80 text-ink/40 hover:text-red-600"
-                            }`}
-                        >
-                            <Heart
-                                size={25}
-                                fill={saved ? "currentColor" : "none"}
-                            />
-                        </button>
-
                         <div className="aspect-square w-full overflow-hidden rounded-2xl bg-mist sm:rounded-3xl">
-
                             {images[activeImage]?.url ? (
                                 <img
                                     src={imageSrc(
