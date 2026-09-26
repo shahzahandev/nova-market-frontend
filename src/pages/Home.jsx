@@ -8,6 +8,7 @@ import HeroSlider from "../components/HeroSlider";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import axios from "axios";
 import About from "../components/About";
+import Contact from "../components/Contact";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
@@ -15,10 +16,13 @@ const GET_HERO_SLIDER_URL = `${API_ORIGIN}/api/v1/banner/getHeroSlider`;
 
 export default function Home() {
   const [product, setProduct] = useState([]);
+  const [newPro, setNewPro] = useState([]);
+  const [deals, setDeals] = useState([]);
+  const [feature, setFeature] = useState([]);
   const [categories, setCategories] = useState([]);
   const heroRef = useRef(null);
   const categoryRef = useScrollReveal();
-  const productRef = useScrollReveal({stagger: 0.06,});
+  const productRef = useScrollReveal({ stagger: 0.06, });
 
   // Banner images
   const [bannerImages, setBannerImages] = useState([]);
@@ -74,10 +78,7 @@ export default function Home() {
     fetchBanner();
   }, []);
 
-  // ============================================================
   // Hero GSAP animation
-  // ============================================================
-
   useEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -124,10 +125,7 @@ export default function Home() {
     return () => ctx.revert();
   }, []);
 
-  // ============================================================
   // Get Products
-  // ============================================================
-
   useEffect(() => {
     const getProduct = async () => {
       try {
@@ -151,10 +149,80 @@ export default function Home() {
     getProduct();
   }, []);
 
-  // ============================================================
-  // Get Categories
-  // ============================================================
+  // Get new Products
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const response = await axios.get(
+          `${API_ORIGIN}/api/v1/product/newProduct`
+        );
 
+        setNewPro(
+          response.data?.products || []
+        );
+      } catch (error) {
+        console.error(
+          "Product fetch error:",
+          error
+        );
+
+        setProduct([]);
+      }
+    };
+
+    getProduct();
+  }, []);
+
+  // Get deals Products
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const response = await axios.get(
+          `${API_ORIGIN}/api/v1/product/dealsProduct`
+        );
+
+        setDeals(
+          response.data?.products || []
+        );
+      } catch (error) {
+        console.error(
+          "Product fetch error:",
+          error
+        );
+
+        setProduct([]);
+      }
+    };
+
+    getProduct();
+  }, []);
+
+  // Get feature Products
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const response = await axios.get(
+          `${API_ORIGIN}/api/v1/product/featureProduct`
+        );
+
+        setFeature(
+          response.data?.products || []
+        );
+      } catch (error) {
+        console.error(
+          "Product fetch error:",
+          error
+        );
+
+        setProduct([]);
+      }
+    };
+
+    getProduct();
+  }, []);
+
+
+  // Get Categories
   useEffect(() => {
     const getCategories = async () => {
       try {
@@ -269,7 +337,114 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* ========= FEATURED PRODUCTS ============= */}
+      {/* new */}
+      <section className="py-16">
+        <Container>
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">
+                Latest
+              </p>
+
+              <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
+                New Arrival Products
+              </h2>
+            </div>
+
+            <Link
+              to="/products"
+              className="hidden text-sm font-semibold text-ink/70 hover:text-ink sm:block"
+            >
+              View all →
+            </Link>
+          </div>
+
+          <div
+            ref={productRef}
+            className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
+          >
+            {newPro.map((p) => (
+              <ProductCard
+                key={p._id}
+                product={p}
+              />
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* deals */}
+      <section className="py-16">
+        <Container>
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">
+                  Deals
+              </p>
+
+              <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
+                  Deals You’ll Love</h2>
+            </div>
+
+            <Link
+              to="/products"
+              className="hidden text-sm font-semibold text-ink/70 hover:text-ink sm:block"
+            >
+              View all →
+            </Link>
+          </div>
+
+          <div
+            ref={productRef}
+            className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
+          >
+            {deals.map((p) => (
+              <ProductCard
+                key={p._id}
+                product={p}
+              />
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* feature */}
+      <section className="py-16">
+        <Container>
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">
+                feature
+              </p>
+
+              <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
+                Everything You Need
+              </h2>
+            </div>
+
+            <Link
+              to="/products"
+              className="hidden text-sm font-semibold text-ink/70 hover:text-ink sm:block"
+            >
+              View all →
+            </Link>
+          </div>
+
+          <div
+            ref={productRef}
+            className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
+          >
+            {feature.map((p) => (
+              <ProductCard
+                key={p._id}
+                product={p}
+              />
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      {/* ========= All PRODUCTS ============= */}
       <section className="py-16">
         <Container>
           <div className="mb-8 flex items-end justify-between">
@@ -279,7 +454,7 @@ export default function Home() {
               </p>
 
               <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
-                Featured products
+                Our All Products
               </h2>
             </div>
 
@@ -346,6 +521,10 @@ export default function Home() {
 
       {/* ============  ABOUT ================ */}
       <About />
+
+
+      <Contact/>
+
     </div>
   );
 }

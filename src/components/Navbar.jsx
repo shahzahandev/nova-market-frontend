@@ -47,9 +47,7 @@ export default function Navbar() {
 
   const navigate = useNavigate();
 
-  // =========================
   // REFS for GSAP
-  // =========================
   const topBarRef = useRef(null);
   const topBarHeightRef = useRef(0);
   const categoryRowRef = useRef(null);
@@ -61,10 +59,6 @@ export default function Navbar() {
   const mobileSearchRowRef = useRef(null);
   const drawerRef = useRef(null);
   const overlayRef = useRef(null);
-
-  // Prevents the scroll listener from re-triggering a toggle
-  // while the collapse/expand animation is still mid-flight —
-  // this is what stops the header from flickering open/closed.
   const scrollLockRef = useRef(false);
 
   // =========================
@@ -714,9 +708,6 @@ export default function Navbar() {
               </Link>
               <Link to="/products" onClick={closeDrawer} className="border-b border-ink/5 py-3 text-sm text-ink/80 hover:text-ink">
                 Shop
-              </Link>
-              <Link to="/blog" onClick={closeDrawer} className="border-b border-ink/5 py-3 text-sm text-ink/80 hover:text-ink">
-                Blog
               </Link>
               <Link to="/contact" onClick={closeDrawer} className="py-3 text-sm text-ink/80 hover:text-ink">
                 Contact
