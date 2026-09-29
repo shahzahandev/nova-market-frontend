@@ -113,9 +113,13 @@ export default function Cart() {
               <Row label="Total" value={`$${total.toFixed(2)}`} bold />
             </div>
           </div>
-          <button className="mt-6 h-12 w-full rounded-full bg-ink text-sm font-semibold text-white hover:bg-ink/90">
-            Checkout
-          </button>
+          <Link
+            to="/checkout">
+            <button className="mt-6 h-12 w-full rounded-full bg-ink text-sm font-semibold text-white hover:bg-ink/90">
+              Checkout
+            </button>
+          </Link>
+
         </aside>
       </div>
     </Container>

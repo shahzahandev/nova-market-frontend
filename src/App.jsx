@@ -20,6 +20,7 @@ import EmailVerify from "./pages/EmailVerify";
 import ProductDetails from "./pages/ProductDetails";
 import Wishlist from "./pages/Wishlist";
 import Contact from "./components/Contact";
+import Checkout from "./pages/Checkout";
 
 function StoreLayout() {
   return (
@@ -47,6 +48,7 @@ export default function App() {
                 <Route path="/productDetails/:id" element={<ProductDetails />} />
                 <Route path="/products/:id" element={<SingleProduct />} />
                 <Route path="/cart" element={<Cart />} />
+                <Route path="/checkout" element={<Checkout />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/wishlist" element={<Wishlist />} />
