@@ -8,7 +8,7 @@ export default function Footer() {
     <footer className="bg-slate-100 text-black text-center">
       <Container className="grid grid-cols-1 gap-10 py-16 sm:grid-cols-3">
         <FooterCol title="Information" links={[
-          "About", "Contact Us", "Shipping", "Careers", "Terms", "Privacy Policy", "FAQ",
+          "About", "Contact Us", "Shipping", "Careers", "Privacy Policy", "Terms"
         ]} />
 
         <div>
@@ -30,7 +30,7 @@ export default function Footer() {
 
           </p>
           <p className="mt-1 md:mt-2 max-w-xs text-sm text-slate-700 mx-auto">
-            Head Office:  Read-4, Momtaz Plaza, Dhanmondi, Dhaka 1000
+            Head Office: House-12 Road-4, Block-B, Niketon, Gulshan, Dhaka 1212
           </p>
 
           <p className="m-1 max-w-xs text-sm text-slate-700 mx-auto">

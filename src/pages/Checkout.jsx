@@ -1,35 +1,24 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Banknote, Check, CreditCard } from "lucide-react";
 import Container from "../components/Container";
 import { useCart } from "../context/CartContext";
 
-// =====================================================
-// API  (route gulo tomar backend onujayi thik kore nio)
-// =====================================================
-
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-const ORDER_BASE = `${API_ORIGIN}/auth/v1/order`;
+const ORDER_BASE = `${API_ORIGIN}/api/v1/order`;
 
 const ONLINE_PAYMENT_URL = `${ORDER_BASE}/payment`; // paymentController
 const COD_ORDER_URL = `${ORDER_BASE}/cod`; // Cash on Delivery (backend e banate hobe)
 
-// =====================================================
-// Config
-// =====================================================
-
-const CURRENCY = "$"; // Cart page er moto. BDT dekhate chaile "৳"
-const DELIVERY_FEE = 60; // Cart page er delivery fee er sathe mil rakho
+const CURRENCY = "৳";
 const MOBILE_REGEX = /^(?:\+?88)?01[3-9]\d{8}$/;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// Backend e userId pathate hoy (cart ta user diye khuje). Login add-to-cart er
-// somoy-i hoye jay, tai ekhane login check kora hoy na. Tomar auth setup
-// onujayi id ta jekhane rakho, shekhan theke nao (jemon useAuth() hook).
 function getUserId() {
   try {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    return user?._id || user?.id || null;
+    const account = localStorage.getItem("account");
+    if (!account) return null;
+    return JSON.parse(account)?._id || null;
   } catch {
     return null;
   }
@@ -40,12 +29,9 @@ const inputClass = (hasError) =>
     hasError ? "border-red-400" : "border-ink/10"
   }`;
 
-// =====================================================
-// Checkout Page
-// =====================================================
-
 export default function Checkout() {
-  const { cartItems, subtotal, clearCart } = useCart();
+  const { cart, loading, totalAmount, fetchCart } = useCart();
+  const userId = getUserId();
 
   const [form, setForm] = useState({
     name: "",
@@ -61,18 +47,12 @@ export default function Checkout() {
   const [serverError, setServerError] = useState("");
   const [placedOrder, setPlacedOrder] = useState(null);
 
-  const delivery = cartItems.length > 0 ? DELIVERY_FEE : 0;
-  const total = subtotal + delivery;
-
   const setField = (key) => (event) => {
     setForm((current) => ({ ...current, [key]: event.target.value }));
     if (errors[key]) setErrors((current) => ({ ...current, [key]: "" }));
   };
 
-  // ===================================================
-  // Validation
-  // ===================================================
-
+  // ---------- Validation ----------
   const validate = () => {
     const next = {};
 
@@ -95,17 +75,17 @@ export default function Checkout() {
     return Object.keys(next).length === 0;
   };
 
-  // ===================================================
-  // Confirm Order
-  // ===================================================
-
+  // ---------- Confirm Order ----------
   const handleSubmit = async (event) => {
     event.preventDefault();
     setServerError("");
 
     if (!validate()) return;
 
-    const userId = getUserId();
+    if (!userId) {
+      setServerError("Please log in first.");
+      return;
+    }
 
     setSubmitting(true);
 
@@ -121,7 +101,6 @@ export default function Checkout() {
         cus_postcode: form.postcode.trim(),
         cus_phone: form.mobile.trim(),
         paymentMethod: payment,
-        deliveryFee: delivery,
       };
 
       const response = await fetch(
@@ -136,33 +115,30 @@ export default function Checkout() {
       const data = await response.json().catch(() => null);
 
       if (!response.ok || data?.success === false) {
-        throw new Error(data?.message || "Order place kora jayni.");
+        throw new Error(data?.message || "Could not place the order.");
       }
 
       // Online payment: gateway page e pathiye dao
       if (payment === "online") {
         const paymentUrl = data?.paymentLink?.payment_url;
-        if (!paymentUrl) throw new Error("Payment link paoa jayni.");
+        if (!paymentUrl) throw new Error("Payment link not found.");
 
         window.location.href = paymentUrl;
         return;
       }
 
-      // Cash on Delivery: order done
-      clearCart();
+      // Cash on Delivery: backend cart clear kore, ekhane abar fetch
+      await fetchCart();
       setPlacedOrder({ tranId: data?.tranId || data?.order?.tranId || "" });
     } catch (err) {
       console.error("Checkout error:", err);
-      setServerError(err.message || "Kichu ekta vul hoyeche. Abar chesta koro.");
+      setServerError(err.message || "Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  // ===================================================
-  // Order placed
-  // ===================================================
-
+  // ---------- Order placed ----------
   if (placedOrder) {
     return (
       <Container className="flex flex-col items-center justify-center py-24 text-center">
@@ -171,7 +147,7 @@ export default function Checkout() {
         </span>
         <h1 className="mt-5 font-display text-2xl font-bold">Order confirmed</h1>
         <p className="mt-2 text-sm text-ink/60">
-          Thank you! Delivery er somoy taka pay korle-i hobe.
+          Thank you! Please pay when your order is delivered.
         </p>
         {placedOrder.tranId && (
           <p className="mt-3 font-mono text-sm text-ink/60">
@@ -188,16 +164,25 @@ export default function Checkout() {
     );
   }
 
-  // ===================================================
-  // Empty cart
-  // ===================================================
+  if (loading) {
+    return (
+      <Container className="py-24 text-center">
+        <p className="text-sm text-ink/60">Loading...</p>
+      </Container>
+    );
+  }
 
-  if (cartItems.length === 0) {
+  if (!userId) {
+    return <Navigate to="/signin" replace />;
+  }
+
+  // ---------- Empty cart ----------
+  if (cart.length === 0) {
     return (
       <Container className="flex flex-col items-center justify-center py-24 text-center">
         <h1 className="font-display text-2xl font-bold">Your cart is empty</h1>
         <p className="mt-2 text-sm text-ink/60">
-          Checkout korar age kichu product add koro.
+          Add some products before checkout.
         </p>
         <Link
           to="/products"
@@ -209,10 +194,7 @@ export default function Checkout() {
     );
   }
 
-  // ===================================================
-  // Render
-  // ===================================================
-
+  // ---------- Render ----------
   return (
     <Container className="py-10">
       <div className="mb-8">
@@ -258,11 +240,7 @@ export default function Checkout() {
               </Field>
 
               <div className="sm:col-span-2">
-                <Field
-                  label="Email"
-                  error={errors.email}
-                  optional={payment !== "online"}
-                >
+                <Field label="Email" error={errors.email} optional={payment !== "online"}>
                   <input
                     type="email"
                     value={form.email}
@@ -331,41 +309,40 @@ export default function Checkout() {
                 onChange={setPayment}
                 icon={CreditCard}
                 title="Online Payment"
-                desc="Advance pay. Secure payment gateway. "
+                desc="Advance pay. Secure payment gateway."
               />
             </div>
           </section>
         </div>
 
-        {/* ================= Right: 3. Order summary ================= */}
+        {/* ===== Right: 3. Order summary ===== */}
         <aside className="h-fit rounded-2xl border border-ink/10 p-5 sm:p-6 lg:sticky lg:top-24">
           <SectionTitle number="3" title="Order summary" />
 
           <ul className="mt-5 max-h-56 divide-y divide-ink/10 overflow-y-auto pr-1">
-            {cartItems.map((item) => {
-              const finalPrice = item.discountPrice || item.price;
-
-              return (
-                <li key={item._id} className="flex items-start justify-between gap-3 py-2.5 text-sm">
-                  <span className="min-w-0 break-words">
-                    {item.title}
-                    <span className="ml-1 text-ink/50">× {item.quantity}</span>
-                  </span>
-                  <span className="shrink-0 font-mono">
-                    {CURRENCY}
-                    {(finalPrice * item.quantity).toFixed(2)}
-                  </span>
-                </li>
-              );
-            })}
+            {cart.map((item) => (
+              <li
+                key={item._id}
+                className="flex items-start justify-between gap-3 py-2.5 text-sm"
+              >
+                <span className="min-w-0 break-words">
+                  {item.product?.title}
+                  <span className="ml-1 text-ink/50">× {item.quantity}</span>
+                </span>
+                <span className="shrink-0 font-mono">
+                  {CURRENCY}
+                  {Number(item.totalPrice).toFixed(2)}
+                </span>
+              </li>
+            ))}
           </ul>
 
-          <div className="mt-4 space-y-3 border-t border-ink/10 pt-4 text-sm">
-            <Row label="Subtotal" value={`${CURRENCY}${subtotal.toFixed(2)}`} />
-            <Row label="Delivery fee" value={`${CURRENCY}${delivery.toFixed(2)}`} />
-            <div className="border-t border-ink/10 pt-3">
-              <Row label="Total" value={`${CURRENCY}${total.toFixed(2)}`} bold />
-            </div>
+          <div className="mt-4 border-t border-ink/10 pt-4 text-sm">
+            <Row
+              label="Total Amount"
+              value={`${CURRENCY}${totalAmount.toFixed(2)}`}
+              bold
+            />
           </div>
 
           {serverError && (
@@ -386,10 +363,6 @@ export default function Checkout() {
     </Container>
   );
 }
-
-// =====================================================
-// Small parts
-// =====================================================
 
 function SectionTitle({ number, title }) {
   return (

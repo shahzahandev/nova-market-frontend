@@ -8,8 +8,6 @@ import { useWishlist } from "../context/WishlistContext";
 
 const MAX_THUMBNAILS = 5;
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
-
-// localStorage key jekhane user info store hoy (tomar key onujayi change koro)
 const USER_STORAGE_KEY = "account";
 
 function imageSrc(url) {
@@ -42,11 +40,13 @@ export default function ProductDetails() {
     const { id } = useParams();
     const location = useLocation();
     const navigate = useNavigate();
-    const { addToCart } = useCart();
+    const { fetchCart, cart } = useCart();
     const { toggleItem, isInWishlist } = useWishlist();
     const [product, setProduct] = useState(location.state?.product || null);
     const [activeImage, setActiveImage] = useState(0);
     const [added, setAdded] = useState(false);
+    const [adding, setAdding] = useState(false);
+    const [cartError, setCartError] = useState("");
 
     // Fetch Product
     useEffect(() => {
@@ -61,7 +61,6 @@ export default function ProductDetails() {
                 console.log("Product fetch error:", error);
             }
         }
-
         getProduct();
     }, [id, product]);
 
@@ -92,10 +91,8 @@ export default function ProductDetails() {
     const today = getDateOnly(new Date());
     const startDate = getDateOnly(product.discountStartDate);
     const endDate = getDateOnly(product.discountEndDate);
-
     const discountStarted = startDate && today && today >= startDate;
     const discountNotExpired = endDate && today && today <= endDate;
-
     // Active Discount
     const hasDiscount =
         Number(product.discountPrice) < Number(product.price) &&
@@ -105,18 +102,24 @@ export default function ProductDetails() {
     // Discount Percentage
     const discountPercent = hasDiscount
         ? Math.round(
-              100 -
-                  (Number(product.discountPrice) / Number(product.price)) *
-                      100
-          )
+            100 -
+            (Number(product.discountPrice) / Number(product.price)) * 100
+        )
         : 0;
 
     // Images
     const images = product.images?.length ? product.images : [];
     const visibleImages = images.slice(0, MAX_THUMBNAILS);
 
+    // Stock + cart quantity
+    const stock = Number(product.stock) || 0;
+    const inCartQty =
+        cart?.find((c) => (c.product?._id || c.product) === product._id)
+            ?.quantity || 0;
+    const maxInCart = stock > 0 && inCartQty >= stock;
+
     // Add To Cart
-    const handleAddToCart = () => {
+    const handleAddToCart = async () => {
         const user = getLoggedInUser();
 
         // Login kora na thakle -> signin page
@@ -125,10 +128,35 @@ export default function ProductDetails() {
             return;
         }
 
-        // Login kora thakle -> cart a add kore cart page
-        addToCart(product);
-        setAdded(true);
-        navigate("/cart");
+        // Frontend stock check (backend o check kore)
+        if (stock <= 0 || inCartQty >= stock) {
+            setCartError(
+                stock > 0
+                    ? `Only ${stock} item(s) available in stock. You already have ${inCartQty} in your cart.`
+                    : "Out of stock"
+            );
+            return;
+        }
+
+        try {
+            setAdding(true);
+            setCartError("");
+
+            await axios.post(`${API_ORIGIN}/api/v1/cart/create`, {
+                proid: product._id,
+                userid: user._id,
+            });
+
+            await fetchCart(); // cart context update, refresh lagbe na
+
+            setAdded(true);
+            setTimeout(() => navigate("/cart"), 1000);
+        } catch (error) {
+            console.log("Add to cart error:", error.response?.data || error.message);
+            setCartError(error.response?.data?.message || "Could not add to cart");
+        } finally {
+            setAdding(false);
+        }
     };
 
     // Wishlist Toggle
@@ -150,11 +178,10 @@ export default function ProductDetails() {
                                     type="button"
                                     onClick={() => setActiveImage(i)}
                                     aria-label={`View image ${i + 1}`}
-                                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 sm:h-18 sm:w-18 md:h-18 md:w-18 ${
-                                        activeImage === i
+                                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 sm:h-18 sm:w-18 md:h-18 md:w-18 ${activeImage === i
                                             ? "scale-[1.02] border-brand-400"
                                             : "border-transparent hover:border-ink/15"
-                                    }`}
+                                        }`}
                                 >
                                     {img.url ? (
                                         <img
@@ -176,15 +203,12 @@ export default function ProductDetails() {
                             type="button"
                             onClick={handleToggleWishlist}
                             aria-label={
-                                saved
-                                    ? "Remove from wishlist"
-                                    : "Add to wishlist"
+                                saved ? "Remove from wishlist" : "Add to wishlist"
                             }
-                            className={`absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur transition-colors sm:h-11 sm:w-11 ${
-                                saved
+                            className={`absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur transition-colors sm:h-11 sm:w-11 ${saved
                                     ? "bg-red-50 text-red-600"
                                     : "border-ink/10 bg-white/80 text-ink/40 hover:text-red-600"
-                            }`}
+                                }`}
                         >
                             <Heart
                                 size={25}
@@ -257,21 +281,29 @@ export default function ProductDetails() {
                     </div>
 
                     {/* Stock */}
-                    <p className="mt-3 text-xs font-medium text-emerald-600">
-                        {product.stock > 0
-                            ? `${product.stock} in stock`
-                            : "Out of stock"}
+                    <p
+                        className={`mt-3 text-xs font-medium ${
+                            stock > 0 ? "text-emerald-600" : "text-red-600"
+                        }`}
+                    >
+                        {stock > 0 ? `${stock} in stock` : "Out of stock"}
                     </p>
 
                     {/* Add To Cart + Wishlist */}
                     <div className="mt-6 flex gap-3">
                         <button
                             onClick={handleAddToCart}
-                            disabled={product.stock === 0}
+                            disabled={stock <= 0 || adding || maxInCart}
                             className="flex flex-1 items-center justify-center gap-2 bg-ink py-5 text-lg font-semibold text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <ShoppingBag size={20} />
-                            {added ? "Added to cart" : "Add to cart"}
+                            {added
+                                ? "Added to cart"
+                                : adding
+                                ? "Adding..."
+                                : maxInCart
+                                ? "Max quantity in cart"
+                                : "Add to cart"}
                         </button>
                         <button
                             type="button"
@@ -281,11 +313,10 @@ export default function ProductDetails() {
                                     ? "Remove from wishlist"
                                     : "Add to wishlist"
                             }
-                            className={`flex items-center justify-center border px-5 transition-colors ${
-                                saved
+                            className={`flex items-center justify-center border px-5 transition-colors ${saved
                                     ? " bg-red-50 text-red-600"
                                     : "border-ink/10 text-ink/60 hover:text-red-600"
-                            }`}
+                                }`}
                         >
                             <Heart
                                 size={40}
@@ -293,6 +324,10 @@ export default function ProductDetails() {
                             />
                         </button>
                     </div>
+
+                    {cartError && (
+                        <p className="mt-2 text-sm text-red-600">{cartError}</p>
+                    )}
 
                     {/* Category / Brand / Tags */}
                     <div className="mt-3 flex flex-col flex-wrap gap-3">

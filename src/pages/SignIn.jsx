@@ -31,8 +31,6 @@ export default function SignIn() {
 
   // =========================
   // FORM VALIDATION
-  // =========================
-
   const validateForm = () => {
     const newErrors = {
       email: "",

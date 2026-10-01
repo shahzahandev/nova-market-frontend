@@ -41,7 +41,7 @@ export default function Navbar() {
   // Compare — wire this up to your real context when ready
   const compareCount = 0;
 
-  const { cartItems } = useCart();
+  const { cartCount } = useCart();
   const { wishlistItems } = useWishlist();
   const wishlistCount = wishlistItems.length;
 
@@ -515,9 +515,9 @@ export default function Navbar() {
 
               <Link to="/cart" className="relative text-ink/70 hover:text-ink">
                 <ShoppingBag size={20} />
-                {cartItems.length > 0 && (
+                {cartCount > 0 && (
                   <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
-                    {cartItems.length}
+                    {cartCount}
                   </span>
                 )}
               </Link>
@@ -730,9 +730,9 @@ export default function Navbar() {
               <Link to="/cart" onClick={closeDrawer} className="flex items-center gap-2 text-sm text-ink/80 hover:text-ink">
                 <ShoppingBag size={16} />
                 Cart
-                {cartItems.length > 0 && (
+                {cartCount > 0 && (
                   <span className="ml-auto rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                    {cartItems.length}
+                    {cartCount}
                   </span>
                 )}
               </Link>
