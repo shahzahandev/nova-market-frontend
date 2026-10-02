@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { User, Package, LogOut, Heart, ShoppingBag, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { User, Package, LogOut } from "lucide-react";
 import Container from "../components/Container";
 import {
   FormField,
@@ -14,7 +14,29 @@ import axios from "axios";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
+// =========================
+// Helpers
+// =========================
 
+const formatDate = (date) =>
+  date
+    ? new Date(date).toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "";
+
+const formatPrice = (price) =>
+  `৳${Number(price || 0).toLocaleString("en-BD")}`;
+
+const STATUS_STYLES = {
+  pending: "bg-yellow-50 text-yellow-700",
+  processing: "bg-blue-50 text-blue-700",
+  shipped: "bg-indigo-50 text-indigo-700",
+  delivered: "bg-green-50 text-green-700",
+  cancelled: "bg-red-50 text-red-600",
+};
 
 const NAV = [
   { key: "profile", label: "Profile", icon: User },
@@ -40,20 +62,19 @@ const EMPTY_ERRORS = {
 };
 
 const BD_PHONE_REGEX = /^(?:\+880|880|0)1[3-9]\d{8}$/;
-
-// Bangladesh postal code = 4 digits
 const POSTAL_CODE_REGEX = /^\d{4}$/;
 
 export default function Profile() {
   const { logout } = useAuth();
   const navigate = useNavigate();
+
   const {
     wishlistItems,
-    removeItem: removeWishlistItem,
     loading: wishlistLoading,
     error: wishlistError,
     refreshWishlist,
   } = useWishlist();
+
   const { addToCart } = useCart();
 
   const [active, setActive] = useState("profile");
@@ -71,8 +92,17 @@ export default function Profile() {
   const [error, setError] = useState("");
 
   // =========================
+  // Orders State
+  // =========================
+
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState("");
+
+  // =========================
   // Validate Single Field
   // =========================
+
   const validateField = (name, value) => {
     const trimmedValue = value.trim();
 
@@ -90,19 +120,17 @@ export default function Profile() {
           return "Full name must be less than 50 characters.";
         }
 
-        // Allows letters, spaces, dot, apostrophe and hyphen
         if (!/^[A-Za-zÀ-ÿ\u0980-\u09FF\s.'-]+$/.test(trimmedValue)) {
           return "Please enter a valid name.";
         }
 
         return "";
 
-      case "phone":
+      case "phone": {
         if (!trimmedValue) {
           return "Phone number is required.";
         }
 
-        // Remove spaces and hyphens before checking
         const normalizedPhone = trimmedValue.replace(/[\s-]/g, "");
 
         if (!BD_PHONE_REGEX.test(normalizedPhone)) {
@@ -110,6 +138,7 @@ export default function Profile() {
         }
 
         return "";
+      }
 
       case "city":
         if (!trimmedValue) {
@@ -160,6 +189,7 @@ export default function Profile() {
   // =========================
   // Validate Entire Form
   // =========================
+
   const validateForm = () => {
     const newErrors = {
       name: validateField("name", formData.name),
@@ -177,19 +207,16 @@ export default function Profile() {
   // =========================
   // Handle Input Change
   // =========================
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     let newValue = value;
 
-    // Phone:
-    // Only allow numbers, spaces, hyphens and +
     if (name === "phone") {
       newValue = value.replace(/[^\d+\s-]/g, "");
     }
 
-    // Postal code:
-    // Only allow digits
     if (name === "postalCode") {
       newValue = value.replace(/\D/g, "").slice(0, 4);
     }
@@ -199,11 +226,9 @@ export default function Profile() {
       [name]: newValue,
     }));
 
-    // Clear general error when user starts typing
     setError("");
     setSuccess("");
 
-    // Validate field while typing
     if (errors[name]) {
       setErrors((prev) => ({
         ...prev,
@@ -215,9 +240,12 @@ export default function Profile() {
   // =========================
   // Get Account From LocalStorage
   // =========================
+
   useEffect(() => {
     try {
-      const storedAccount = JSON.parse(localStorage.getItem("account"));
+      const storedAccount = JSON.parse(
+        localStorage.getItem("account")
+      );
 
       setAccountInfo(storedAccount);
 
@@ -235,6 +263,7 @@ export default function Profile() {
   // =========================
   // Fetch User Profile
   // =========================
+
   useEffect(() => {
     if (!accountInfo?._id) return;
 
@@ -244,7 +273,7 @@ export default function Profile() {
         setError("");
 
         const res = await axios.get(
-          `https://nova-market-backend-2.onrender.com/api/v1/user/singleUser/${accountInfo._id}`
+          `${API_ORIGIN}/api/v1/user/singleUser/${accountInfo._id}`
         );
 
         const user =
@@ -279,15 +308,74 @@ export default function Profile() {
   }, [accountInfo?._id]);
 
   // =========================
+  // Fetch User Orders
+  // =========================
+
+  useEffect(() => {
+    if (active !== "orders" || !accountInfo?._id) return;
+
+    let cancelled = false;
+
+    const getOrders = async () => {
+      try {
+        setOrdersLoading(true);
+        setOrdersError("");
+
+        const res = await axios.get(
+          `${API_ORIGIN}/api/v1/order/getSingleUserOrders/${accountInfo._id}`
+        );
+
+        // Your backend response:
+        // {
+        //   success: true,
+        //   orders: [...]
+        // }
+
+        const userOrders = Array.isArray(res.data.orders)
+          ? res.data.orders
+          : [];
+
+        if (!cancelled) {
+          setOrders(userOrders);
+        }
+      } catch (err) {
+        console.error("Orders fetch error:", err);
+
+        if (cancelled) return;
+
+        if (err.response?.status === 404) {
+          setOrders([]);
+          setOrdersError("");
+        } else {
+          setOrdersError(
+            err.response?.data?.message ||
+              "Could not load your orders."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setOrdersLoading(false);
+        }
+      }
+    };
+
+    getOrders();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [active, accountInfo?._id]);
+
+  // =========================
   // Update Profile
   // =========================
+
   const handleSave = async (e) => {
     e.preventDefault();
 
     setError("");
     setSuccess("");
 
-    // Validate before API request
     const isValid = validateForm();
 
     if (!isValid) {
@@ -303,7 +391,6 @@ export default function Profile() {
     try {
       setSaving(true);
 
-      // Normalize phone before sending to backend
       const normalizedPhone = formData.phone
         .trim()
         .replace(/[\s-]/g, "");
@@ -317,7 +404,7 @@ export default function Profile() {
       };
 
       const res = await axios.post(
-        `https://nova-market-backend-2.onrender.com/api/v1/user/updateUser/${accountInfo._id}`,
+        `${API_ORIGIN}/api/v1/user/updateUser/${accountInfo._id}`,
         payload
       );
 
@@ -333,9 +420,6 @@ export default function Profile() {
         );
       }
 
-      // =========================
-      // Update Form
-      // =========================
       setFormData({
         name: updatedUser.name || "",
         email: updatedUser.email || formData.email || "",
@@ -345,12 +429,8 @@ export default function Profile() {
         address: updatedUser.address || "",
       });
 
-      // Clear validation errors
       setErrors(EMPTY_ERRORS);
 
-      // =========================
-      // Update LocalStorage
-      // =========================
       const updatedAccountInfo = {
         ...accountInfo,
         name: updatedUser.name,
@@ -367,7 +447,6 @@ export default function Profile() {
 
       setAccountInfo(updatedAccountInfo);
 
-      // Navbar sync
       window.dispatchEvent(new Event("profileUpdated"));
 
       setSuccess("Profile updated successfully.");
@@ -391,6 +470,7 @@ export default function Profile() {
   // =========================
   // Navigation
   // =========================
+
   const handleNavClick = (key) => {
     if (key === "logout") {
       setShowLogoutConfirm(true);
@@ -403,9 +483,9 @@ export default function Profile() {
   // =========================
   // Logout
   // =========================
-  const confirmLogout = () => {
-    logout(); // clears localStorage and fires the "logout" event itself now
 
+  const confirmLogout = () => {
+    logout();
     navigate("/");
   };
 
@@ -416,8 +496,9 @@ export default function Profile() {
         {/* =========================
             Sidebar
         ========================= */}
+
         <aside className="h-fit rounded-2xl border border-ink/10 p-3">
-          <nav className="grid md:flex grid-cols-2 gap-2 overflow-x-auto md:flex-col">
+          <nav className="grid grid-cols-2 gap-2 overflow-x-auto md:flex md:flex-col">
             {NAV.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -425,7 +506,7 @@ export default function Profile() {
                 onClick={() => handleNavClick(key)}
                 className={`flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                   key === "logout"
-                    ? "text-red-600 hover:bg-red-100 bg-red-50"
+                    ? "bg-red-50 text-red-600 hover:bg-red-100"
                     : active === key
                     ? "bg-brand-400 text-white"
                     : "text-ink/70 hover:bg-mist"
@@ -433,17 +514,6 @@ export default function Profile() {
               >
                 <Icon size={18} />
                 {label}
-                {key === "wishlist" && wishlistItems.length > 0 && (
-                  <span
-                    className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      active === key
-                        ? "bg-white/20 text-white"
-                        : "bg-brand-500 text-white"
-                    }`}
-                  >
-                    {wishlistItems.length}
-                  </span>
-                )}
               </button>
             ))}
           </nav>
@@ -452,11 +522,13 @@ export default function Profile() {
         {/* =========================
             Main Section
         ========================= */}
+
         <section className="rounded-2xl border border-ink/10 p-6 sm:p-8">
 
           {/* =========================
               Profile
           ========================= */}
+
           {active === "profile" && (
             <>
               <h1 className="font-display text-xl font-bold">
@@ -582,14 +654,12 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* General Error */}
                   {error && (
                     <FormMessage type="error">
                       {error}
                     </FormMessage>
                   )}
 
-                  {/* Success */}
                   {success && (
                     <FormMessage type="success">
                       <div className="px-2 py-2">
@@ -598,7 +668,6 @@ export default function Profile() {
                     </FormMessage>
                   )}
 
-                  {/* Submit */}
                   <div className="sm:w-48">
                     <SubmitButton loading={saving}>
                       Save changes
@@ -612,6 +681,7 @@ export default function Profile() {
           {/* =========================
               Orders
           ========================= */}
+
           {active === "orders" && (
             <>
               <h1 className="font-display text-xl font-bold">
@@ -619,22 +689,242 @@ export default function Profile() {
               </h1>
 
               <p className="mt-1 text-sm text-ink/60">
-                Your order history will appear here.
+                Here you can see all your orders.
               </p>
 
-              <div className="mt-6 rounded-xl border border-dashed border-ink/15 p-10 text-center text-sm text-ink/40">
-                No orders to show yet.
-              </div>
+              {/* Loading */}
+              {ordersLoading && (
+                <div className="mt-6 rounded-xl border border-ink/10 p-8 text-center">
+                  <p className="text-sm text-ink/50">
+                    Loading your orders...
+                  </p>
+                </div>
+              )}
+
+              {/* Error */}
+              {!ordersLoading && ordersError && (
+                <div className="mt-6">
+                  <FormMessage type="error">
+                    {ordersError}
+                  </FormMessage>
+                </div>
+              )}
+
+              {/* Empty */}
+              {!ordersLoading &&
+                !ordersError &&
+                orders.length === 0 && (
+                  <div className="mt-6 rounded-xl border border-dashed border-ink/15 p-10 text-center">
+                    <Package
+                      size={40}
+                      className="mx-auto text-ink/20"
+                    />
+
+                    <p className="mt-3 text-sm font-medium text-ink/60">
+                      No orders found
+                    </p>
+
+                    <p className="mt-1 text-xs text-ink/40">
+                      Your order history will appear here.
+                    </p>
+                  </div>
+                )}
+
+              {/* Orders */}
+              {!ordersLoading &&
+                !ordersError &&
+                orders.length > 0 && (
+                  <div className="mt-6 space-y-5">
+
+                    {orders.map((order) => {
+                      const status = String(
+                        order.status || "pending"
+                      ).toLowerCase();
+
+                      const products = Array.isArray(order.products)
+                        ? order.products
+                        : [];
+
+                      const subtotal = Number(
+                        order.subTotal || 0
+                      );
+
+                      const deliveryCharge = Number(
+                        order.deliveryCharge || 0
+                      );
+
+                      const totalPrice = Number(
+                        order.totalPrice || 0
+                      );
+
+                      return (
+                        <div
+                          key={order._id}
+                          className="overflow-hidden rounded-2xl border border-ink/10 bg-white"
+                        >
+
+                          {/* =========================
+                              Order Header
+                          ========================= */}
+
+                          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 bg-mist/30 px-4 py-4 sm:px-5">
+
+                            <div>
+                              <p className="text-sm font-bold">
+                                Order #
+                                {String(order._id)
+                                  .slice(-8)
+                                  .toUpperCase()}
+                              </p>
+
+                              <p className="mt-1 text-xs text-ink/50">
+                                {formatDate(order.createdAt)}
+                              </p>
+                            </div>
+
+                            <span
+                              className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+                                STATUS_STYLES[status] ||
+                                "bg-mist text-ink/70"
+                              }`}
+                            >
+                              {status}
+                            </span>
+                          </div>
+
+                          {/* =========================
+                              Products
+                          ========================= */}
+                          <div className="px-4 sm:px-5">
+                            {products.length > 0 ? (
+                              <div className="divide-y divide-ink/5">
+                                {products.map((product) => {
+                                  const quantity = Number(
+                                    product.quantity || 1
+                                  );
+
+                                  const itemTotal = Number(
+                                    product.totalPrice || 0
+                                  );
+
+                                  return (
+                                    <div
+                                      key={product._id}
+                                      className="flex items-center justify-between gap-4 py-4">
+                                      <div className="min-w-0 flex justify-between gap-4">
+                                        <p className="truncate text-sm font-medium text-ink">
+                                          {product.title}
+                                        </p>
+
+                                        <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-ink/50">
+                                          <span>
+                                            Qty: {quantity}
+                                          </span>
+                                        </div>
+                                      </div>
+
+                                      <p className="shrink-0 text-sm font-semibold">
+                                        {formatPrice(itemTotal)}
+                                      </p>
+
+                                    </div>
+                                  );
+                                })}
+
+                              </div>
+                            ) : (
+                              <p className="py-5 text-sm text-ink/40">
+                                No products found in this order.
+                              </p>
+                            )}
+
+                          </div>
+
+                          {/* =========================
+                              Order Summary
+                          ========================= */}
+
+                          <div className="border-t border-ink/10 bg-mist/20 px-4 py-4 sm:px-5">
+                            <div className="ml-auto max-w-sm space-y-2 text-sm">
+                              {/* Delivery */}
+                              <div className="flex justify-between gap-4">
+                                <span className="text-ink/60">
+                                  Delivery
+                                </span>
+
+                                <span className="font-medium">
+                                  {deliveryCharge === 0
+                                    ? "Free"
+                                    : formatPrice(
+                                        deliveryCharge
+                                      )}
+                                </span>
+                              </div>
+
+
+                              {/* Total */}
+                              <div className="flex justify-between gap-4">
+                                <span className="font-semibold">
+                                  Total
+                                </span>
+                                <span className="text-base font-bold">
+                                  {formatPrice(totalPrice)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          {/* =========================
+                              Transaction
+                          ========================= */}
+
+                          {order.tranId && (
+                            <div className="flex justify-between border-t border-ink/10 px-4 py-3 sm:px-5">
+                              <p className="text-xs text-ink/40">
+                                Transaction ID:{" "}
+                                {
+                                  order.paymentMethod == "cod" ? 'Not Avaiable' : 
+                                  <span className="font-medium text-ink/60">
+                                  {order.tranId}
+                                </span>
+                                }
+                              </p>
+                              
+                              {/* Payment Method */}
+                              {order.paymentMethod && (
+                                <div className="text-xs">
+                               {
+                                order.paymentMethod == "cod" ?
+                                   <span className="text-ink/60">
+                                   Cash On Delivery <span className="font-bold">({order.paymentMethod})</span> 
+                                  </span> :
+                                     <span className="text-ink/60">
+                                    Paid By <span className="font-bold">{order.paymentMethod}</span> 
+                                  </span>
+                               }
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                        </div>
+                      );
+                    })}
+
+                  </div>
+                )}
             </>
           )}
+
         </section>
       </div>
 
       {/* =========================
           Logout Confirmation
       ========================= */}
+
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
+
           <div className="w-full max-w-sm rounded-2xl bg-white p-6">
 
             <h3 className="font-display text-lg font-bold">

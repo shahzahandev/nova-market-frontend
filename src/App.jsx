@@ -22,6 +22,10 @@ import Wishlist from "./pages/Wishlist";
 import Contact from "./components/Contact";
 import Checkout from "./pages/Checkout";
 
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFail from "./pages/PaymentFail";
+import PaymentCancel from "./pages/PaymentCancel";
+
 function StoreLayout() {
   return (
     <>
@@ -52,7 +56,10 @@ export default function App() {
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/wishlist" element={<Wishlist />} />
-                <Route path="/contact" element={<Contact/>}/>
+                <Route path="/contact" element={<Contact />} />
+                <Route path="/payment/success" element={<PaymentSuccess />} />
+                <Route path="/payment/fail" element={<PaymentFail />} />
+                <Route path="/payment/cancel" element={<PaymentCancel />} />
               </Route>
 
               <Route path="/signup" element={<SignUp />} />

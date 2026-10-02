@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { Banknote, Check, CreditCard } from "lucide-react";
 import Container from "../components/Container";
@@ -6,9 +6,10 @@ import { useCart } from "../context/CartContext";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 const ORDER_BASE = `${API_ORIGIN}/api/v1/order`;
+const DELIVERY_SETTINGS_URL = `${API_ORIGIN}/api/v1/delivery/settings`;
 
-const ONLINE_PAYMENT_URL = `${ORDER_BASE}/payment`; // paymentController
-const COD_ORDER_URL = `${ORDER_BASE}/cod`; // Cash on Delivery (backend e banate hobe)
+const ONLINE_PAYMENT_URL = `${ORDER_BASE}/payment`;
+const COD_ORDER_URL = `${ORDER_BASE}/cod`;
 
 const CURRENCY = "৳";
 const MOBILE_REGEX = /^(?:\+?88)?01[3-9]\d{8}$/;
@@ -42,10 +43,60 @@ export default function Checkout() {
     address: "",
   });
   const [payment, setPayment] = useState("cod");
+  const [deliveryArea, setDeliveryArea] = useState("inside"); // "inside" | "outside"
+  const [settings, setSettings] = useState(null);
+  const [settingsError, setSettingsError] = useState(false);
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
   const [placedOrder, setPlacedOrder] = useState(null);
+
+  // ---------- Delivery settings ----------
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSettings() {
+      try {
+        const res = await fetch(DELIVERY_SETTINGS_URL);
+        const data = await res.json();
+        if (!res.ok || !data?.settings) throw new Error("Failed");
+        if (!cancelled) setSettings(data.settings);
+      } catch (error) {
+        console.error("Delivery settings error:", error);
+        if (!cancelled) setSettingsError(true);
+      }
+    }
+
+    loadSettings();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ---------- Delivery charge (shudhu dekhanor jonno, asol hishab backend e) ----------
+  const subTotal = totalAmount;
+
+  const freeByPromo = Boolean(settings?.freeAllActive);
+  const freeByThreshold = Boolean(
+    settings?.freeDeliveryEnabled && subTotal >= settings.freeDeliveryThreshold
+  );
+  const isFree = freeByPromo || freeByThreshold;
+
+  const chargeFor = (area) => {
+    if (!settings) return 0;
+    if (isFree) return 0;
+    return area === "inside"
+      ? Number(settings.insideDhakaCharge)
+      : Number(settings.outsideDhakaCharge);
+  };
+
+  const delivery = chargeFor(deliveryArea);
+  const total = subTotal + delivery;
+
+  const amountLeftForFree =
+    settings?.freeDeliveryEnabled && !isFree
+      ? Math.max(0, Number(settings.freeDeliveryThreshold) - subTotal)
+      : 0;
 
   const setField = (key) => (event) => {
     setForm((current) => ({ ...current, [key]: event.target.value }));
@@ -87,11 +138,17 @@ export default function Checkout() {
       return;
     }
 
+    if (!settings) {
+      setServerError("Delivery charge could not be loaded. Please refresh the page.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const payload = {
         userId,
+        deliveryArea, // charge na, shudhu area pathai. Charge backend hishab kore
         cus_name: form.name.trim(),
         cus_email: form.email.trim(),
         cus_add1: form.address.trim(),
@@ -129,7 +186,10 @@ export default function Checkout() {
 
       // Cash on Delivery: backend cart clear kore, ekhane abar fetch
       await fetchCart();
-      setPlacedOrder({ tranId: data?.tranId || data?.order?.tranId || "" });
+      setPlacedOrder({
+        tranId: data?.tranId || data?.order?.tranId || "",
+        grandTotal: data?.grandTotal,
+      });
     } catch (err) {
       console.error("Checkout error:", err);
       setServerError(err.message || "Something went wrong. Please try again.");
@@ -152,6 +212,12 @@ export default function Checkout() {
         {placedOrder.tranId && (
           <p className="mt-3 font-mono text-sm text-ink/60">
             Order ID: {placedOrder.tranId}
+          </p>
+        )}
+        {placedOrder.grandTotal !== undefined && (
+          <p className="mt-1 font-mono text-sm font-semibold">
+            Total: {CURRENCY}
+            {Number(placedOrder.grandTotal).toFixed(2)}
           </p>
         )}
         <Link
@@ -280,12 +346,39 @@ export default function Checkout() {
                   <textarea
                     value={form.address}
                     onChange={setField("address")}
-                    placeholder="House, road, area"
+                    placeholder="House, Road, Block, Area"
                     autoComplete="street-address"
                     rows={3}
                     className={`min-h-[96px] resize-none py-3 ${inputClass(errors.address)}`}
                   />
                 </Field>
+              </div>
+
+              {/* Delivery area */}
+              <div className="sm:col-span-2">
+                <span className="mb-1.5 block text-sm font-medium">Delivery area</span>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <AreaOption
+                    value="inside"
+                    selected={deliveryArea === "inside"}
+                    onChange={setDeliveryArea}
+                    title="Inside Dhaka"
+                    charge={settings ? chargeFor("inside") : null}
+                  />
+                  <AreaOption
+                    value="outside"
+                    selected={deliveryArea === "outside"}
+                    onChange={setDeliveryArea}
+                    title="Outside Dhaka"
+                    charge={settings ? chargeFor("outside") : null}
+                  />
+                </div>
+
+                {settingsError && (
+                  <p className="mt-2 text-xs text-red-600">
+                    Could not load delivery charge. Please refresh the page.
+                  </p>
+                )}
               </div>
             </div>
           </section>
@@ -337,12 +430,39 @@ export default function Checkout() {
             ))}
           </ul>
 
-          <div className="mt-4 border-t border-ink/10 pt-4 text-sm">
+          <div className="mt-4 space-y-3 border-t border-ink/10 pt-4 text-sm">
+            <Row label="Subtotal" value={`${CURRENCY}${subTotal.toFixed(2)}`} />
             <Row
-              label="Total Amount"
-              value={`${CURRENCY}${totalAmount.toFixed(2)}`}
-              bold
+              label="Delivery charge"
+              value={
+                !settings
+                  ? "..."
+                  : isFree
+                  ? "Free"
+                  : `${CURRENCY}${delivery.toFixed(2)}`
+              }
+              highlight={Boolean(settings) && isFree}
             />
+
+            {freeByPromo && (
+              <p className="text-xs text-emerald-600">
+                Free delivery offer is running on all products!
+              </p>
+            )}
+            {amountLeftForFree > 0 && (
+              <p className="text-xs text-ink/50">
+                Add {CURRENCY}
+                {amountLeftForFree.toFixed(2)} more to get free delivery.
+              </p>
+            )}
+
+            <div className="border-t border-ink/10 pt-3">
+              <Row
+                label="Total"
+                value={`${CURRENCY}${total.toFixed(2)}`}
+                bold
+              />
+            </div>
           </div>
 
           {serverError && (
@@ -353,7 +473,7 @@ export default function Checkout() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !settings}
             className="mt-6 h-12 w-full rounded-full bg-ink text-sm font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? "Placing order..." : "Confirm Order"}
@@ -384,6 +504,39 @@ function Field({ label, error, optional, children }) {
       </span>
       {children}
       {error && <span className="mt-1 block text-xs text-red-600">{error}</span>}
+    </label>
+  );
+}
+
+function AreaOption({ value, selected, onChange, title, charge }) {
+  return (
+    <label
+      className={`flex cursor-pointer items-center gap-3 rounded-2xl border p-4 transition focus-within:ring-2 focus-within:ring-ink/20 ${
+        selected ? "border-ink bg-mist" : "border-ink/10 hover:border-ink/30"
+      }`}
+    >
+      <input
+        type="radio"
+        name="deliveryArea"
+        value={value}
+        checked={selected}
+        onChange={() => onChange(value)}
+        className="sr-only"
+      />
+
+      <span
+        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
+          selected ? "border-ink bg-ink text-white" : "border-ink/20"
+        }`}
+      >
+        {selected && <Check size={12} />}
+      </span>
+
+      <span className="min-w-0 flex-1 text-sm font-semibold">{title}</span>
+
+      <span className="shrink-0 font-mono text-sm text-ink/70">
+        {charge === null ? "..." : charge === 0 ? "Free" : `${CURRENCY}${charge}`}
+      </span>
     </label>
   );
 }
@@ -428,11 +581,17 @@ function PaymentOption({ value, selected, onChange, icon: Icon, title, desc }) {
   );
 }
 
-function Row({ label, value, bold }) {
+function Row({ label, value, bold, highlight }) {
   return (
     <div className="flex justify-between">
       <span className={bold ? "font-semibold text-ink" : "text-ink/60"}>{label}</span>
-      <span className={`font-mono ${bold ? "text-base font-bold" : ""}`}>{value}</span>
+      <span
+        className={`font-mono ${bold ? "text-base font-bold" : ""} ${
+          highlight ? "font-semibold text-emerald-600" : ""
+        }`}
+      >
+        {value}
+      </span>
     </div>
   );
 }
