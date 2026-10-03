@@ -5,6 +5,8 @@ import { WishlistProvider } from "./context/WishlistContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import About from "./components/About";
+import WhatsAppButton from "./components/WhatsAppButton";
+
 
 
 import Home from "./pages/Home";
@@ -21,10 +23,16 @@ import ProductDetails from "./pages/ProductDetails";
 import Wishlist from "./pages/Wishlist";
 import Contact from "./components/Contact";
 import Checkout from "./pages/Checkout";
-
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFail from "./pages/PaymentFail";
 import PaymentCancel from "./pages/PaymentCancel";
+
+
+import Terms from "./pages/Terms";
+import Shhiping from "./pages/Shipping";
+import Careers from "./pages/Careers";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+
 
 function StoreLayout() {
   return (
@@ -34,6 +42,7 @@ function StoreLayout() {
         <Outlet />
       </main>
       <Footer />
+      <WhatsAppButton />
     </>
   );
 }
@@ -42,7 +51,6 @@ export default function App() {
   return (
     <AuthProvider>
       <CartProvider>
-
         <BrowserRouter>
           <WishlistProvider>
             <Routes>
@@ -60,6 +68,10 @@ export default function App() {
                 <Route path="/payment/success" element={<PaymentSuccess />} />
                 <Route path="/payment/fail" element={<PaymentFail />} />
                 <Route path="/payment/cancel" element={<PaymentCancel />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/shhiping" element={<Shhiping />} />
+                <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
+                <Route path="/careers" element={<Careers />} />
               </Route>
 
               <Route path="/signup" element={<SignUp />} />
