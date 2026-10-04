@@ -18,7 +18,7 @@ export default function PaymentSuccess() {
 
   return (
     <Container className="flex flex-col items-center justify-center py-24 text-center">
-      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white">
+      <span className="flex h-14 w-14 items-center justify-center rounded-full bg-[#1cee5f] text-white">
         <Check size={26} />
       </span>
 
