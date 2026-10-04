@@ -9,6 +9,7 @@ import { useScrollReveal } from "../hooks/useScrollReveal";
 import axios from "axios";
 import About from "../components/About";
 import Contact from "../components/Contact";
+import NoticeBoard from "../components/NoticeBoard";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
@@ -336,6 +337,8 @@ export default function Home() {
           </div>
         </Container>
       </section>
+
+      <NoticeBoard />
 
       {/* new */}
       <section className="py-16">
