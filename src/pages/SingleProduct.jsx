@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Container from "../components/Container";
 import axios from "axios";
+import { ChevronsRight } from "lucide-react";
 
 const MAX_THUMBNAILS = 5;
 
@@ -45,7 +46,7 @@ export default function SingleProduct() {
 
                 setProduct(res.data.data);
             } catch (error) {
-                console.log( "Product fetch error:", error );
+                console.log("Product fetch error:", error);
             }
         }
         getProduct();
@@ -88,9 +89,9 @@ export default function SingleProduct() {
 
     const today = getDateOnly(new Date());
 
-    const startDate = getDateOnly( product.discountStartDate );
+    const startDate = getDateOnly(product.discountStartDate);
 
-    const endDate = getDateOnly( product.discountEndDate );
+    const endDate = getDateOnly(product.discountEndDate);
 
     const discountStarted =
         startDate &&
@@ -105,18 +106,18 @@ export default function SingleProduct() {
     // Active Discount
     const hasDiscount =
         Number(product.discountPrice) <
-            Number(product.price) &&
+        Number(product.price) &&
         discountStarted &&
         discountNotExpired;
 
- 
+
     const discountPercent = hasDiscount
         ? Math.round(
-              100 -
-                  (Number(product.discountPrice) /
-                      Number(product.price)) *
-                      100
-          )
+            100 -
+            (Number(product.discountPrice) /
+                Number(product.price)) *
+            100
+        )
         : 0;
 
     return (
@@ -137,24 +138,21 @@ export default function SingleProduct() {
                                                 i
                                             )
                                         }
-                                        aria-label={`View image ${
-                                            i + 1
-                                        }`}
-                                        className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 sm:h-18 sm:w-18 md:h-18 md:w-18 ${
-                                            activeImage ===
-                                            i
+                                        aria-label={`View image ${i + 1
+                                            }`}
+                                        className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 sm:h-18 sm:w-18 md:h-18 md:w-18 ${activeImage ===
+                                                i
                                                 ? "scale-[1.02] border-brand-400"
                                                 : "border-transparent hover:border-ink/15"
-                                        }`}
+                                            }`}
                                     >
                                         {img.url ? (
                                             <img
                                                 src={imageSrc(
                                                     img.url
                                                 )}
-                                                alt={`${product.title} ${
-                                                    i + 1
-                                                }`}
+                                                alt={`${product.title} ${i + 1
+                                                    }`}
                                                 className="h-full w-full object-cover"
                                             />
                                         ) : (
@@ -216,12 +214,12 @@ export default function SingleProduct() {
 
                                 {product.reviewCount >
                                     0 && (
-                                    <span className="text-xs text-ink/50 sm:text-sm">
-                                        (
-                                        {product.reviewCount.toLocaleString()}
-                                        reviews)
-                                    </span>
-                                )}
+                                        <span className="text-xs text-ink/50 sm:text-sm">
+                                            (
+                                            {product.reviewCount.toLocaleString()}
+                                            reviews)
+                                        </span>
+                                    )}
 
                             </div>
                         )}
@@ -230,7 +228,7 @@ export default function SingleProduct() {
                             Price
                         ================================================= */}
 
-                        <div className="mt-5 flex flex-wrap items-center justify-center gap-2 font-mono md:justify-start">
+                        <div className="mt-5 flex flex-wrap items-center justify-center gap-5 font-mono md:justify-start">
 
                             {hasDiscount ? (
                                 <>
@@ -267,8 +265,13 @@ export default function SingleProduct() {
 
                         <p className="mt-3 text-xs font-medium text-emerald-600">
                             {product.stock > 0
-                                ? `${product.stock} in stock`
-                                : "Out of stock"}
+                                ? 
+                                (`${product.stock} in stock`)
+                                :(
+                                    <div className="text-gray-500">
+                                        Out of stock
+                                    </div>
+                                )}
                         </p>
 
                     </div>
@@ -297,8 +300,14 @@ export default function SingleProduct() {
                             className="flex min-h-14 flex-1 items-center justify-center bg-ink px-4 py-4 text-lg font-semibold text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-16 sm:text-xl md:py-6 md:text-2xl lg:py-7"
                         >
                             {product.stock === 0
-                                ? "Out of Stock"
-                                : "Get it"}
+                                ? ("Out of Stock")
+                                : (
+                                   <div className="flex gap-1 items-center">
+                                    Get it
+                                    <ChevronsRight size={28} className="text-white/80" />
+                                    </div> 
+                                
+                            )}
                         </button>
 
                     </div>

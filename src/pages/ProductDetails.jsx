@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { ShoppingBag, Truck, ShieldCheck, RotateCcw, Heart } from "lucide-react";
+import { ShoppingBag, Truck, ShieldCheck, RotateCcw, Heart, X } from "lucide-react";
 import axios from "axios";
 import Container from "../components/Container";
 import { useCart } from "../context/CartContext";
@@ -44,7 +44,7 @@ export default function ProductDetails() {
     const { toggleItem, isInWishlist } = useWishlist();
     const [product, setProduct] = useState(location.state?.product || null);
     const [activeImage, setActiveImage] = useState(0);
-    const [added, setAdded] = useState(false);
+    const [showToast, setShowToast] = useState(false);
     const [adding, setAdding] = useState(false);
     const [cartError, setCartError] = useState("");
 
@@ -77,6 +77,13 @@ export default function ProductDetails() {
 
         setActiveImage(mainIndex >= 0 ? mainIndex : 0);
     }, [product]);
+
+    // Popup 5 second pore automatic remove hobe
+    useEffect(() => {
+        if (!showToast) return;
+        const timer = setTimeout(() => setShowToast(false), 5000);
+        return () => clearTimeout(timer);
+    }, [showToast]);
 
     // Loading
     if (!product) {
@@ -118,8 +125,9 @@ export default function ProductDetails() {
             ?.quantity || 0;
     const maxInCart = stock > 0 && inCartQty >= stock;
 
-    // Add To Cart
-    const handleAddToCart = async () => {
+    // redirect = true hole (Buy now) 0.5 second pore cart page e jabe
+    // redirect = false hole (Add to cart) popup dekhabe, page change hobe na
+    const addToCart = async (redirect = false) => {
         const user = getLoggedInUser();
 
         // Login kora na thakle -> signin page
@@ -128,13 +136,20 @@ export default function ProductDetails() {
             return;
         }
 
-        // Frontend stock check (backend o check kore)
-        if (stock <= 0 || inCartQty >= stock) {
-            setCartError(
-                stock > 0
-                    ? `Only ${stock} item(s) available in stock. You already have ${inCartQty} in your cart.`
-                    : "Out of stock"
-            );
+        if (stock <= 0) {
+            setCartError("Out of stock");
+            return;
+        }
+
+        // Already max quantity cart e thakle, Buy now e shudhu cart page e niye jabe
+        if (inCartQty >= stock) {
+            if (redirect) {
+                navigate("/cart");
+            } else {
+                setCartError(
+                    `Only ${stock} item(s) available in stock. You already have ${inCartQty} in your cart.`
+                );
+            }
             return;
         }
 
@@ -149,8 +164,11 @@ export default function ProductDetails() {
 
             await fetchCart(); // cart context update, refresh lagbe na
 
-            setAdded(true);
-            setTimeout(() => navigate("/cart"), 1000);
+            if (redirect) {
+                setTimeout(() => navigate("/cart"), 500);
+            } else {
+                setShowToast(true);
+            }
         } catch (error) {
             console.log("Add to cart error:", error.response?.data || error.message);
             setCartError(error.response?.data?.message || "Could not add to cart");
@@ -158,6 +176,9 @@ export default function ProductDetails() {
             setAdding(false);
         }
     };
+
+    const handleAddToCart = () => addToCart(false);
+    const handleBuyNow = () => addToCart(true);
 
     // Wishlist Toggle
     const saved = isInWishlist(product._id);
@@ -168,6 +189,26 @@ export default function ProductDetails() {
 
     return (
         <Container className="py-6 sm:py-8 md:py-10">
+            {/* Add to cart success popup */}
+            {showToast && (
+                <div
+                    role="status"
+                    className="fixed left-1/2 top-24 z-50 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-xl border border-ink/10 bg-white px-4 py-5 text-green-600 shadow-lg"
+                >
+                    <span className="text-sm">
+                        Product added in successfully your cart 
+                    </span>
+                    <button
+                        type="button"
+                        onClick={() => setShowToast(false)}
+                        aria-label="Close"
+                        className="shrink-0 text-red-300 transition hover:opacity-70"
+                    >
+                        <X size={18} />
+                    </button>
+                </div>
+            )}
+
             <div className="grid grid-cols-1 gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:gap-5">
                     {visibleImages.length > 1 && (
@@ -260,7 +301,7 @@ export default function ProductDetails() {
                     )}
 
                     {/* ============ Price ============= */}
-                    <div className="mt-5 flex items-center gap-5">
+                    <div className="mt-5 flex flex-wrap items-center justify-center gap-5 font-mono md:justify-start">
                         {hasDiscount ? (
                             <>
                                 <span className="text-2xl font-bold text-brand-600 sm:text-3xl">
@@ -289,39 +330,29 @@ export default function ProductDetails() {
                         {stock > 0 ? `${stock} in stock` : "Out of stock"}
                     </p>
 
-                    {/* Add To Cart + Wishlist */}
+                    {/* Buy Now + Add To Cart */}
                     <div className="mt-6 flex gap-3">
                         <button
+                            type="button"
+                            onClick={handleBuyNow}
+                            disabled={stock <= 0 || adding}
+                            className="flex flex-1 items-center justify-center gap-2 border-2 border-ink bg-white py-5 text-lg font-semibold text-ink transition hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            Buy now
+                        </button>
+
+                        <button
+                            type="button"
                             onClick={handleAddToCart}
                             disabled={stock <= 0 || adding || maxInCart}
                             className="flex flex-1 items-center justify-center gap-2 bg-ink py-5 text-lg font-semibold text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <ShoppingBag size={20} />
-                            {added
-                                ? "Added to cart"
-                                : adding
+                            {adding
                                 ? "Adding..."
                                 : maxInCart
                                 ? "Max quantity in cart"
                                 : "Add to cart"}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={handleToggleWishlist}
-                            aria-label={
-                                saved
-                                    ? "Remove from wishlist"
-                                    : "Add to wishlist"
-                            }
-                            className={`flex items-center justify-center border px-5 transition-colors ${saved
-                                    ? " bg-red-50 text-red-600"
-                                    : "border-ink/10 text-ink/60 hover:text-red-600"
-                                }`}
-                        >
-                            <Heart
-                                size={40}
-                                fill={saved ? "currentColor" : "none"}
-                            />
                         </button>
                     </div>
 

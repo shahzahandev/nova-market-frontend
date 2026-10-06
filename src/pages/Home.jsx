@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import gsap from "gsap";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ChevronsRight } from "lucide-react";
 import Container from "../components/Container";
 import ProductCard from "../components/ProductCard";
 import HeroSlider from "../components/HeroSlider";
@@ -259,7 +259,7 @@ export default function Home() {
         ref={heroRef}
         className="relative overflow-hidden bg-ink text-white"
       >
-        <Container className="grid items-center gap-10 py-14 sm:py-16 lg:grid-cols-2 lg:py-8">
+        <Container className="grid items-center gap-8 py-6 sm:py-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12 lg:py-6">
           <div>
             <p
               data-hero-eyebrow
@@ -270,37 +270,24 @@ export default function Home() {
 
             <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
               <span className="block overflow-hidden">
-                <span
-                  data-hero-word
-                  className="block"
-                >
+                <span data-hero-word className="block">
                   Everyday gear,
                 </span>
               </span>
 
               <span className="block overflow-hidden">
-                <span
-                  data-hero-word
-                  className="block text-brand-400"
-                >
+                <span data-hero-word className="block text-brand-400">
                   designed with intent.
                 </span>
               </span>
             </h1>
 
-            <p
-              data-hero-sub
-              className="mt-6 max-w-md text-white/60"
-            >
-              Curated tech and lifestyle products
-              from makers who obsess over the
+            <p data-hero-sub className="mt-6 max-w-md text-white/60">
+              Curated tech and lifestyle products from makers who obsess over the
               details, so you don't have to.
             </p>
 
-            <div
-              data-hero-cta
-              className="mt-8 flex flex-wrap gap-3"
-            >
+            <div data-hero-cta className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/products"
                 className="flex h-12 items-center gap-2 rounded-full bg-brand-400 px-6 text-sm font-semibold text-ink transition hover:bg-brand-300"
@@ -318,28 +305,19 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ======================================================
-              HERO SLIDER
-          ====================================================== */}
-
-          <div className="flex justify-center">
+          {/* ================= HERO SLIDER ================= */}
+          <div className="flex w-full justify-center lg:justify-end">
             {bannerImages.length > 0 ? (
-              <HeroSlider
-                images={bannerImages}
-              />
+              <HeroSlider images={bannerImages} />
             ) : (
-              <div className="flex aspect-video w-full max-w-xl items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                <p className="text-sm text-white/50">
-                  No banner images available
-                </p>
+              <div className="flex aspect-video w-full items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                <p className="text-sm text-white/50">No banner images available</p>
               </div>
             )}
           </div>
         </Container>
       </section>
-
-      <NoticeBoard />
-
+      
       {/* new */}
       <section className="py-16">
         <Container>
@@ -362,31 +340,39 @@ export default function Home() {
             </Link>
           </div>
 
-          <div
-            ref={productRef}
-            className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
-          >
-            {newPro.map((p) => (
-              <ProductCard
-                key={p._id}
-                product={p}
-              />
-            ))}
-          </div>
+          {newPro && newPro.length > 0 ? (
+            <div
+              ref={productRef}
+              className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
+            >
+              {newPro.map((p) => (
+                <ProductCard
+                  key={p._id}
+                  product={p}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-40 items-center justify-center rounded-lg ">
+              <p className="text-sm font-medium text-gray-500 sm:text-base">
+                No Available Product
+              </p>
+            </div>
+          )}
         </Container>
       </section>
-
       {/* deals */}
       <section className="py-16">
         <Container>
           <div className="mb-8 flex items-end justify-between">
             <div>
               <p className="font-mono text-xs uppercase tracking-[0.2em] text-brand-600">
-                  Deals
+                Deals
               </p>
 
               <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">
-                  Deals You’ll Love</h2>
+                Deals You’ll Love
+              </h2>
             </div>
 
             <Link
@@ -397,17 +383,25 @@ export default function Home() {
             </Link>
           </div>
 
-          <div
-            ref={productRef}
-            className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
-          >
-            {deals.map((p) => (
-              <ProductCard
-                key={p._id}
-                product={p}
-              />
-            ))}
-          </div>
+          {deals && deals.length > 0 ? (
+            <div
+              ref={productRef}
+              className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
+            >
+              {deals.map((p) => (
+                <ProductCard
+                  key={p._id}
+                  product={p}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-40 items-center justify-center rounded-lg">
+              <p className="text-sm font-medium text-gray-500 sm:text-base">
+                No Product Available
+              </p>
+            </div>
+          )}
         </Container>
       </section>
 
@@ -433,17 +427,25 @@ export default function Home() {
             </Link>
           </div>
 
-          <div
-            ref={productRef}
-            className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
-          >
-            {feature.map((p) => (
-              <ProductCard
-                key={p._id}
-                product={p}
-              />
-            ))}
-          </div>
+          {feature && feature.length > 0 ? (
+            <div
+              ref={productRef}
+              className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
+            >
+              {feature.map((p) => (
+                <ProductCard
+                  key={p._id}
+                  product={p}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-40 items-center justify-center rounded-lg">
+              <p className="text-sm font-medium text-gray-500 sm:text-base">
+                No Product Available
+              </p>
+            </div>
+          )}
         </Container>
       </section>
 
@@ -469,17 +471,25 @@ export default function Home() {
             </Link>
           </div>
 
-          <div
-            ref={productRef}
-            className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
-          >
-            {product.map((p) => (
-              <ProductCard
-                key={p._id}
-                product={p}
-              />
-            ))}
-          </div>
+          {product && product.length > 0 ? (
+            <div
+              ref={productRef}
+              className="grid grid-cols-2 gap-0 sm:grid-cols-3 lg:grid-cols-4"
+            >
+              {product.map((p) => (
+                <ProductCard
+                  key={p._id}
+                  product={p}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex min-h-40 items-center justify-center">
+              <p className="text-sm font-medium text-gray-500 sm:text-base">
+                No Product Available
+              </p>
+            </div>
+          )}
         </Container>
       </section>
 
@@ -495,10 +505,9 @@ export default function Home() {
               Categories products
             </h2>
           </div>
-
           <div
             ref={categoryRef}
-            className="grid grid-cols-4 gap-2 sm:grid-cols-4"
+            className="grid grid-cols-3 gap-2 sm:grid-cols-4"
           >
             {categories.map((cat) => (
               <Link
@@ -508,13 +517,19 @@ export default function Home() {
                 className="group overflow-hidden rounded-lg bg-gray-100 shadow-sm"
               >
                 <div className="flex flex-col items-center justify-center px-4 py-2 transition-colors duration-500 group-hover:bg-black/10">
-                  <h3 className="font-display font-bold capitalize text-gray-900 transition-colors duration-500 md:text-2xl">
+                  <h3 className="font-display font-bold capitalize text-gray-900 transition-colors duration-500 text-[12px] md:text-lg">
                     {cat}
                   </h3>
+                  <div className="group flex items-center text-slate-400 cursor-pointer">
+                    <span className="text-[8px] md:text-sm font-medium text-gray-600 transition-colors duration-500">
+                      View All
+                    </span>
 
-                  <span className="text-[10px] md:text-sm font-medium text-gray-600 transition-colors duration-500">
-                    View All
-                  </span>
+                    <ChevronsRight
+                      size={10}
+                      className="ml-1 transition-transform duration-300 group-hover:translate-x-1 md:ml-2 md:size-4"
+                    />
+                  </div>
                 </div>
               </Link>
             ))}
@@ -524,9 +539,7 @@ export default function Home() {
 
       {/* ============  ABOUT ================ */}
       <About />
-
-
-      <Contact/>
+      <Contact />
 
     </div>
   );

@@ -16,7 +16,6 @@ const NoticeBoard = () => {
         console.error("Notice load failed", err);
       }
     };
-
     fetchNotice();
   }, []);
 

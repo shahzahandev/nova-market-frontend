@@ -178,37 +178,25 @@ export default function ProductCard({ product }) {
         ================================================= */}
 
         <div className="mt-3 text-center">
-
-          {/* Category */}
-
-          <p className="text-[12px] text-ink capitalize">
-            {product.category}
-          </p>
-
           {/* Product Title */}
-
-          <p className="line-clamp-1 text-sm font-medium text-ink">
+          <p className="line-clamp-1 text-sm md:text-lg font-medium text-ink">
             {product.title}
           </p>
 
-          {/* =================================================
-              Price
-          ================================================= */}
-
+          {/* =========== Price ========== */}
           <div className="flex items-center justify-center gap-1">
-
             {hasDiscount ? (
               <>
                 {/* Discount Price */}
 
-                <span className="text-[12px] font-bold text-black">
+                <span className="text-[12px] md:text-[16px] font-bold text-black">
                   ৳{product.discountPrice}
                 </span>
 
                 {/* Original Price */}
 
-                <span className="text-[10px] text-slate-600 line-through">
-                  ৳{product.price}
+                <span className="text-[12px] text-slate-400 line-through">
+                  {product.price}
                 </span>
               </>
             ) : (

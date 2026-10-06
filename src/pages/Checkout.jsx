@@ -202,7 +202,7 @@ export default function Checkout() {
   if (placedOrder) {
     return (
       <Container className="flex flex-col items-center justify-center py-24 text-center">
-        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-ink text-white">
+        <span className="flex h-14 w-14 items-center justify-center rounded-full bg-green-400 text-white">
           <Check size={26} />
         </span>
         <h1 className="mt-5 font-display text-2xl font-bold">Order confirmed</h1>
