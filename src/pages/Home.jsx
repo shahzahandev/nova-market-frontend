@@ -317,6 +317,8 @@ export default function Home() {
           </div>
         </Container>
       </section>
+
+      <NoticeBoard/>
       
       {/* new */}
       <section className="py-16">
@@ -516,18 +518,18 @@ export default function Home() {
                 data-reveal
                 className="group overflow-hidden rounded-lg bg-gray-100 shadow-sm"
               >
-                <div className="flex flex-col items-center justify-center px-4 py-2 transition-colors duration-500 group-hover:bg-black/10">
-                  <h3 className="font-display font-bold capitalize text-gray-900 transition-colors duration-500 text-[12px] md:text-lg">
+                <div className="flex flex-col items-center justify-center md:px-4 py-1 md:py-2 transition-colors duration-500 group-hover:bg-black/10">
+                  <h3 className="font-display font-bold capitalize text-gray-900 transition-colors duration-500 text-[8px] md:text-[14px]">
                     {cat}
                   </h3>
-                  <div className="group flex items-center text-slate-400 cursor-pointer">
-                    <span className="text-[8px] md:text-sm font-medium text-gray-600 transition-colors duration-500">
+                  <div className="hidden group md:flex items-center text-slate-400 cursor-pointer">
+                    <span className="md:text-[10px] font-medium text-gray-600 transition-colors duration-500">
                       View All
                     </span>
 
                     <ChevronsRight
                       size={10}
-                      className="ml-1 transition-transform duration-300 group-hover:translate-x-1 md:ml-2 md:size-4"
+                      className="transition-transform duration-300 group-hover:translate-x-1 md:size-4"
                     />
                   </div>
                 </div>

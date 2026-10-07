@@ -34,11 +34,6 @@ export default function WhatsAppButton() {
 
   return (
     <div className="fixed bottom-5 right-5 z-[9999] flex flex-col items-end">
-      <div
-        className=" mb-2 rounded-full bg-[#0cc14e] px-4 py-2 text-sm font-medium text-white shadow-md border border-slate-100" >
-        Say something
-      </div>
-
       <a href={`https://wa.me/${whatsapp.phone}`}
         target="_blank"
         rel="noopener noreferrer"

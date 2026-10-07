@@ -196,7 +196,7 @@ export default function ProductDetails() {
                     className="fixed left-1/2 top-24 z-50 flex w-max max-w-[calc(100vw-2rem)] -translate-x-1/2 items-center gap-3 rounded-xl border border-ink/10 bg-white px-4 py-5 text-green-600 shadow-lg"
                 >
                     <span className="text-sm">
-                        Product added in successfully your cart 
+                        Product added in successfully your cart
                     </span>
                     <button
                         type="button"
@@ -220,8 +220,8 @@ export default function ProductDetails() {
                                     onClick={() => setActiveImage(i)}
                                     aria-label={`View image ${i + 1}`}
                                     className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 sm:h-18 sm:w-18 md:h-18 md:w-18 ${activeImage === i
-                                            ? "scale-[1.02] border-brand-400"
-                                            : "border-transparent hover:border-ink/15"
+                                        ? "scale-[1.02] border-brand-400"
+                                        : "border-transparent hover:border-ink/15"
                                         }`}
                                 >
                                     {img.url ? (
@@ -247,8 +247,8 @@ export default function ProductDetails() {
                                 saved ? "Remove from wishlist" : "Add to wishlist"
                             }
                             className={`absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border backdrop-blur transition-colors sm:h-11 sm:w-11 ${saved
-                                    ? "bg-red-50 text-red-600"
-                                    : "border-ink/10 bg-white/80 text-ink/40 hover:text-red-600"
+                                ? "bg-red-50 text-red-600"
+                                : "border-ink/10 bg-white/80 text-ink/40 hover:text-red-600"
                                 }`}
                         >
                             <Heart
@@ -321,14 +321,7 @@ export default function ProductDetails() {
                         )}
                     </div>
 
-                    {/* Stock */}
-                    <p
-                        className={`mt-3 text-xs font-medium ${
-                            stock > 0 ? "text-emerald-600" : "text-red-600"
-                        }`}
-                    >
-                        {stock > 0 ? `${stock} in stock` : "Out of stock"}
-                    </p>
+
 
                     {/* Buy Now + Add To Cart */}
                     <div className="mt-6 flex gap-3">
@@ -351,8 +344,8 @@ export default function ProductDetails() {
                             {adding
                                 ? "Adding..."
                                 : maxInCart
-                                ? "Max quantity in cart"
-                                : "Add to cart"}
+                                    ? "Max quantity in cart"
+                                    : "Add to cart"}
                         </button>
                     </div>
 
@@ -362,6 +355,17 @@ export default function ProductDetails() {
 
                     {/* Category / Brand / Tags */}
                     <div className="mt-3 flex flex-col flex-wrap gap-3">
+
+
+                        {/* Stock */}
+                        <div className="flex items-center gap-1 text-lg font-semibold capitalize text-ink/60">
+                            <span className="text-black">Stock :
+                            </span>
+                            <p>
+                                {stock > 0 ? ` ${stock}` : "Out"}
+                            </p>
+                        </div>
+
                         {product.category && (
                             <span className="text-lg font-semibold capitalize text-ink/60">
                                 <span className="text-black">Category :</span>{" "}

@@ -5,7 +5,6 @@ import axios from "axios";
 import { ChevronsRight } from "lucide-react";
 
 const MAX_THUMBNAILS = 5;
-
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
@@ -64,9 +63,7 @@ export default function SingleProduct() {
                 img.isMain === "true"
         );
 
-        setActiveImage(
-            mainIndex >= 0 ? mainIndex : 0
-        );
+        setActiveImage( mainIndex >= 0 ? mainIndex : 0 );
     }, [product]);
 
     if (!product) {
@@ -82,26 +79,13 @@ export default function SingleProduct() {
         ? product.images
         : [];
 
-    const visibleImages = images.slice(
-        0,
-        MAX_THUMBNAILS
-    );
+    const visibleImages = images.slice( 0, MAX_THUMBNAILS );
 
     const today = getDateOnly(new Date());
-
     const startDate = getDateOnly(product.discountStartDate);
-
     const endDate = getDateOnly(product.discountEndDate);
-
-    const discountStarted =
-        startDate &&
-        today &&
-        today >= startDate;
-
-    const discountNotExpired =
-        endDate &&
-        today &&
-        today <= endDate;
+    const discountStarted = startDate && today && today >= startDate;
+    const discountNotExpired = endDate && today && today <= endDate;
 
     // Active Discount
     const hasDiscount =
@@ -117,8 +101,7 @@ export default function SingleProduct() {
             (Number(product.discountPrice) /
                 Number(product.price)) *
             100
-        )
-        : 0;
+        ) : 0;
 
     return (
         <Container className="py-6 sm:py-8 md:py-10">
@@ -129,30 +112,23 @@ export default function SingleProduct() {
                             {visibleImages.map(
                                 (img, i) => (
                                     <button
-                                        key={
-                                            img._id || i
-                                        }
+                                        key={ img._id || i }
                                         type="button"
                                         onClick={() =>
-                                            setActiveImage(
-                                                i
-                                            )
+                                            setActiveImage( i )
                                         }
                                         aria-label={`View image ${i + 1
                                             }`}
                                         className={`h-16 w-16 shrink-0 overflow-hidden rounded-xl border-2 transition-all duration-200 sm:h-18 sm:w-18 md:h-18 md:w-18 ${activeImage ===
-                                                i
-                                                ? "scale-[1.02] border-brand-400"
-                                                : "border-transparent hover:border-ink/15"
+                                            i
+                                            ? "scale-[1.02] border-brand-400"
+                                            : "border-transparent hover:border-ink/15"
                                             }`}
                                     >
                                         {img.url ? (
                                             <img
-                                                src={imageSrc(
-                                                    img.url
-                                                )}
-                                                alt={`${product.title} ${i + 1
-                                                    }`}
+                                                src={imageSrc( img.url )}
+                                                alt={`${product.title} ${i + 1 }`}
                                                 className="h-full w-full object-cover"
                                             />
                                         ) : (
@@ -161,7 +137,6 @@ export default function SingleProduct() {
                                     </button>
                                 )
                             )}
-
                         </div>
                     )}
 
@@ -170,9 +145,7 @@ export default function SingleProduct() {
                             {images[activeImage]?.url ? (
                                 <img
                                     src={imageSrc(
-                                        images[
-                                            activeImage
-                                        ].url
+                                        images[ activeImage ].url
                                     )}
                                     alt={product.title}
                                     className="h-full w-full object-cover transition duration-300"
@@ -182,13 +155,10 @@ export default function SingleProduct() {
                                     Product image
                                 </div>
                             )}
-
                         </div>
-
                     </div>
                 </div>
                 <div className="flex flex-col">
-
                     <div className="text-center md:text-start">
                         {product.brand && (
                             <p className="font-mono text-sm uppercase tracking-[0.15em] text-brand-600 sm:text-base md:text-lg">
@@ -200,14 +170,11 @@ export default function SingleProduct() {
                         </h1>
 
                         {/* Rating */}
-
                         {product.rating > 0 && (
                             <div className="mt-3 flex items-center justify-center gap-2 md:justify-start">
-
                                 <span className="text-sm font-semibold sm:text-base">
                                     {product.rating}
                                 </span>
-
                                 <span className="text-sm tracking-wide text-amber-500 sm:text-base">
                                     ★★★★★
                                 </span>
@@ -220,35 +187,24 @@ export default function SingleProduct() {
                                             reviews)
                                         </span>
                                     )}
-
                             </div>
                         )}
 
-                        {/* =================================================
-                            Price
-                        ================================================= */}
-
+                        {/* ========== Price ============= */}
                         <div className="mt-5 flex flex-wrap items-center justify-center gap-5 font-mono md:justify-start">
-
                             {hasDiscount ? (
                                 <>
                                     {/* Discount Price */}
-
                                     <span className="text-2xl font-bold text-brand-600 sm:text-3xl">
-                                        ৳
-                                        {
-                                            product.discountPrice
-                                        }
+                                        ৳ {product.discountPrice}
                                     </span>
 
                                     {/* Original Price */}
-
                                     <span className="text-lg text-slate-400 line-through sm:text-xl md:text-2xl">
                                         ৳{product.price}
                                     </span>
 
                                     {/* Discount Percentage */}
-
                                     <span className="rounded-full bg-amber-400/20 px-2.5 py-1 text-xs font-bold text-amber-600">
                                         -{discountPercent}%
                                     </span>
@@ -258,76 +214,48 @@ export default function SingleProduct() {
                                     ৳{product.price}
                                 </span>
                             )}
-
                         </div>
 
                         {/* Stock */}
-
                         <p className="mt-3 text-xs font-medium text-emerald-600">
                             {product.stock > 0
-                                ? 
-                                (`${product.stock} in stock`)
-                                :(
+                                ? (`${product.stock} in stock`)
+                                : (
                                     <div className="text-gray-500">
                                         Out of stock
                                     </div>
                                 )}
                         </p>
-
                     </div>
 
-                    {/* =================================================
-                        Get It Button
-                    ================================================= */}
-
+                    {/* ========== Get It Button ========= */}
                     <div className="mt-6 flex gap-3">
-
                         <button
                             type="button"
                             onClick={() =>
                                 navigate(
                                     `/productDetails/${product._id}`,
-                                    {
-                                        state: {
-                                            product,
-                                        },
-                                    }
+                                    {state: {product,},}
                                 )
                             }
-                            disabled={
-                                product.stock === 0
-                            }
-                            className="flex min-h-14 flex-1 items-center justify-center bg-ink px-4 py-4 text-lg font-semibold text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-16 sm:text-xl md:py-6 md:text-2xl lg:py-7"
-                        >
-                            {product.stock === 0
-                                ? ("Out of Stock")
-                                : (
-                                   <div className="flex gap-1 items-center">
-                                    Get it
-                                    <ChevronsRight size={28} className="text-white/80" />
-                                    </div> 
-                                
-                            )}
+                            className="flex min-h-14 flex-1 items-center justify-center bg-ink px-4 py-4 text-lg font-semibold text-white transition hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50 sm:min-h-16 sm:text-xl md:py-6 md:text-2xl lg:py-7">
+                            <div className="flex gap-1 items-center">
+                                Get it
+                                <ChevronsRight size={28} className="text-white/80" />
+                            </div>
                         </button>
 
                     </div>
-
-                    {/* Description */}
-
                     {product.description && (
                         <div className="mt-8 sm:mt-10">
-
                             <h2 className="text-base font-semibold sm:text-lg">
                                 Description
                             </h2>
-
                             <p className="mt-2 text-sm leading-relaxed text-ink/60 sm:text-base">
                                 {product.description}
                             </p>
-
                         </div>
                     )}
-
                 </div>
             </div>
         </Container>
