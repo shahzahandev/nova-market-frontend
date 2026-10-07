@@ -15,6 +15,7 @@ import {
   Mail,
   LogIn,
   Plus,
+  ShoppingCart,
 } from "lucide-react";
 
 import Container from "./Container";
@@ -30,7 +31,7 @@ function imageSrc(url) {
 
 export default function Navbar() {
   const [open, setOpen] = useState(false); // mobile drawer
-  const [mobileTab, setMobileTab] = useState("categories"); // categories | menu | more
+  const [mobileTab, setMobileTab] = useState("categories"); // categories | menu
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -61,9 +62,7 @@ export default function Navbar() {
   const overlayRef = useRef(null);
   const scrollLockRef = useRef(false);
 
-  // =========================
   // MEASURE COLLAPSIBLE HEIGHTS ONCE
-  // =========================
   useEffect(() => {
     if (topBarRef.current) {
       topBarHeightRef.current = topBarRef.current.scrollHeight;
@@ -73,9 +72,7 @@ export default function Navbar() {
     }
   }, [categories]);
 
-  // =========================
   // SCROLL LISTENER — hysteresis based, no flicker/loop
-  // =========================
   useEffect(() => {
     let ticking = false;
 
@@ -138,9 +135,7 @@ export default function Navbar() {
     }
   }, [scrolled]);
 
-  // =========================
   // GET LOGGED IN USER
-  // =========================
   useEffect(() => {
     const updateUser = () => {
       try {
@@ -169,9 +164,7 @@ export default function Navbar() {
     };
   }, []);
 
-  // =========================
   // GET CATEGORIES
-  // =========================
   useEffect(() => {
     const getCategories = async () => {
       try {
@@ -186,9 +179,7 @@ export default function Navbar() {
     getCategories();
   }, []);
 
-  // =========================
   // GET PRODUCTS
-  // =========================
   useEffect(() => {
     const getProducts = async () => {
       try {
@@ -203,9 +194,7 @@ export default function Navbar() {
     getProducts();
   }, []);
 
-  // =========================
   // CATEGORY ROW SCROLL ARROWS
-  // =========================
   const updateScrollButtons = () => {
     const el = categoryScrollRef.current;
     if (!el) return;
@@ -583,17 +572,54 @@ export default function Navbar() {
       <div className="relative md:hidden">
         {/* DEFAULT ROW */}
         <div ref={mobileDefaultRef} className="flex h-16 items-center justify-between px-4">
-          <button type="button" onClick={() => setOpen(true)} aria-label="Menu">
-            <Menu size={22} />
-          </button>
+          {/* LEFT: menu + logo */}
+          <div className="flex min-w-0 items-center gap-3">
+            <button type="button" onClick={() => setOpen(true)} aria-label="Menu">
+              <Menu size={22} />
+            </button>
 
-          <Link to="/" className="font-display text-lg font-bold tracking-tight">
-            Nova<span className="text-brand-500">Market</span>
-          </Link>
+            <Link to="/" className="font-display text-lg font-bold tracking-tight">
+              Nova<span className="text-brand-500">Market</span>
+            </Link>
+          </div>
 
-          <button type="button" onClick={openMobileSearch} aria-label="Search">
-            <Search size={20} />
-          </button>
+          {/* RIGHT: search, wishlist, profile, cart */}
+          <div className="flex shrink-0 items-center gap-4">
+            <button
+              type="button"
+              onClick={openMobileSearch}
+              aria-label="Search"
+              className="text-ink/70"
+            >
+              <Search size={20} />
+            </button>
+
+            <Link to="/wishlist" aria-label="Wishlist" className="relative text-ink/70">
+              <Heart size={20} />
+              {wishlistCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+
+            <Link to="/cart" aria-label="Cart" className="relative text-ink/70">
+              <ShoppingCart size={20} />
+              {cartCount > 0 && (
+                <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-brand-500 text-[10px] font-bold text-white">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+
+               <Link
+              to={accountInfo ? "/profile" : "/signin"}
+              aria-label="Profile"
+              className="text-ink/70"
+            >
+              <User size={20} />
+            </Link>
+          </div>
         </div>
 
         {/* SEARCH ROW — hidden by default, GSAP toggles it */}
@@ -655,15 +681,6 @@ export default function Navbar() {
 
           <button
             type="button"
-            onClick={() => setMobileTab("more")}
-            className={`flex-1 py-2 text-sm font-semibold transition ${mobileTab === "more" ? "bg-brand-500 text-ink rounded-lg" : "text-ink/50"
-              }`}
-          >
-            More
-          </button>
-
-          <button
-            type="button"
             onClick={closeDrawer}
             className="p-2 text-ink/50 hover:text-ink absolute right-[-27px] top-1.3 bg-white border-[4px] border-black/40 rounded-full"
             aria-label="Close menu"
@@ -711,35 +728,6 @@ export default function Navbar() {
               </Link>
               <Link to="/contact" onClick={closeDrawer} className="py-3 text-sm text-ink/80 hover:text-ink">
                 Contact
-              </Link>
-            </div>
-          )}
-
-          {mobileTab === "more" && (
-            <div className="flex flex-col gap-6">
-              <Link to="/wishlist" onClick={closeDrawer} className="flex items-center gap-2 text-sm text-ink/80 hover:text-ink">
-                <Heart size={16} />
-                Wishlist
-                {wishlistCount > 0 && (
-                  <span className="ml-auto rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                    {wishlistCount}
-                  </span>
-                )}
-              </Link>
-
-              <Link to="/cart" onClick={closeDrawer} className="flex items-center gap-2 text-sm text-ink/80 hover:text-ink">
-                <ShoppingBag size={16} />
-                Cart
-                {cartCount > 0 && (
-                  <span className="ml-auto rounded-full bg-brand-500 px-2 py-0.5 text-[10px] font-bold text-white">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-
-              <Link to={accountInfo ? "/profile" : "/signin"} onClick={closeDrawer} className="flex items-center gap-2 text-sm text-ink/80 hover:text-ink">
-                <User size={16} />
-                {accountInfo ? accountInfo.name : "Login / Register"}
               </Link>
             </div>
           )}
