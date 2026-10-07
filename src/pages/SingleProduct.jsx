@@ -196,7 +196,7 @@ export default function SingleProduct() {
                                 <>
                                     {/* Discount Price */}
                                     <span className="text-2xl font-bold text-brand-600 sm:text-3xl">
-                                        ৳ {product.discountPrice}
+                                        ৳{product.discountPrice}
                                     </span>
 
                                     {/* Original Price */}
