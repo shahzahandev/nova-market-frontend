@@ -1,12 +1,18 @@
 import Container from "./Container";
 import { Instagram, Facebook, Twitter } from "lucide-react";
 import pay from "../assets/pay.webp";
+import { useStoreInfo } from "../context/StoreInfoContext";
+
 
 export default function Footer() {
+
+  const { storeInfo } = useStoreInfo();
+
+
   return (
     <footer className="bg-slate-100 text-black text-center">
       <Container className="grid grid-cols-1 gap-10 py-16 sm:grid-cols-3">
-        
+
         {/* Information */}
         <FooterCol
           title="Information"
@@ -53,7 +59,21 @@ export default function Footer() {
         {/* Company Information */}
         <div className="col-span-1 sm:col-span-1">
           <p className="font-display text-2xl md:text-4xl font-bold">
-            Nova<span className="text-brand-500">Market</span>
+            {(() => {
+              const name = storeInfo?.storeName || "";
+              const words = name.split(" ");
+              const firstWord = words.shift();
+              const remainingWords = words.join(" ");
+
+              return (
+                <>
+                  {firstWord}
+                  {remainingWords && (
+                    <span className="text-brand-500">{remainingWords}</span>
+                  )}
+                </>
+              );
+            })()}
           </p>
 
           <p className="font-display text-lg md:text-2xl font-bold">
@@ -64,14 +84,10 @@ export default function Footer() {
             Head Office: House-12 Road-4, Block-B, Niketon, Gulshan, Dhaka 1212
           </p>
 
-          <p className="m-1 max-w-xs text-sm text-slate-700 mx-auto">
-            Email: novamarket@gmail.com
+          <p className="flex items-center justify-center space-x-1 m-1 max-w-xs text-sm text-slate-700 mx-auto">
+     <p>Email:</p>
+            <p>{storeInfo?.storeEmail || ""}</p>
           </p>
-
-          <p className="mt-1 max-w-xs text-sm text-slate-700 mx-auto">
-            License No: TRAD/CHTG/019582/2025
-          </p>
-
           <p className="mt-1 max-w-xs text-sm text-slate-700 mx-auto">
             01737-954516 | 01404-753495
           </p>

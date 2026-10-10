@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { WishlistProvider } from "./context/WishlistContext";
+import { StoreInfoProvider } from "./context/StoreInfoContext";
+
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import About from "./components/About";
@@ -50,6 +52,7 @@ function StoreLayout() {
 export default function App() {
   return (
     <AuthProvider>
+      <StoreInfoProvider>
       <CartProvider>
         <BrowserRouter>
           <WishlistProvider>
@@ -83,6 +86,7 @@ export default function App() {
           </WishlistProvider>
         </BrowserRouter>
       </CartProvider>
+      </StoreInfoProvider>
     </AuthProvider>
   );
 }

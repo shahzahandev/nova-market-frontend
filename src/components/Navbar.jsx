@@ -21,12 +21,33 @@ import {
 import Container from "./Container";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import { useStoreInfo } from "../context/StoreInfoContext";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
 function imageSrc(url) {
   if (!url) return "";
   return url.startsWith("http") ? url : `${API_ORIGIN}${url}`;
+}
+
+// Store name-er last word brand color-e dekhabe (ager "Nova" + "Market" design-er moto)
+function BrandName({ name }) {
+  const words = (name || "").trim().split(/\s+/).filter(Boolean);
+
+  if (words.length === 0) return null;
+
+  if (words.length === 1) {
+    return <span>{words[0]}</span>;
+  }
+
+  const lastWord = words[words.length - 1];
+  const firstPart = words.slice(0, -1).join(" ");
+
+  return (
+    <>
+      {firstPart} <span className="text-brand-500">{lastWord}</span>
+    </>
+  );
 }
 
 export default function Navbar() {
@@ -45,6 +66,11 @@ export default function Navbar() {
   const { cartCount } = useCart();
   const { wishlistItems } = useWishlist();
   const wishlistCount = wishlistItems.length;
+
+  // Store info (dashboard theke update korle ekhaneo sathe sathe change hoy)
+  const { storeInfo } = useStoreInfo();
+  const storeName = storeInfo?.storeName || "Nova Market";
+  const storeEmail = storeInfo?.storeEmail || "support@novamarket.com";
 
   const navigate = useNavigate();
 
@@ -444,7 +470,7 @@ export default function Navbar() {
 
             <div className="flex items-center gap-5">
 
-              <a href="mailto:support@novamarket.com"
+              <a href={`mailto:${storeEmail}`}
                 className="flex items-center gap-1.5 hover:text-ink"
               >
                 <Mail size={13} />
@@ -466,7 +492,7 @@ export default function Navbar() {
         <Container className="py-4">
           <div className="flex items-center justify-between gap-6">
             <Link to="/" className="shrink-0 font-display text-2xl font-bold tracking-tight">
-              Nova<span className="text-brand-500">Market</span>
+              <BrandName name={storeName} />
             </Link>
 
             <div className="relative max-w-xl flex-1">
@@ -578,8 +604,8 @@ export default function Navbar() {
               <Menu size={22} />
             </button>
 
-            <Link to="/" className="font-display text-lg font-bold tracking-tight">
-              Nova<span className="text-brand-500">Market</span>
+            <Link to="/" className="truncate font-display text-lg font-bold tracking-tight">
+              <BrandName name={storeName} />
             </Link>
           </div>
 
@@ -612,7 +638,7 @@ export default function Navbar() {
               )}
             </Link>
 
-               <Link
+            <Link
               to={accountInfo ? "/profile" : "/signin"}
               aria-label="Profile"
               className="text-ink/70"
