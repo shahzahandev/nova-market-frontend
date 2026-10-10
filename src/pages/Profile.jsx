@@ -14,10 +14,6 @@ import axios from "axios";
 
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 
-// =========================
-// Helpers
-// =========================
-
 const formatDate = (date) =>
   date
     ? new Date(date).toLocaleDateString("en-GB", {
@@ -67,42 +63,22 @@ const POSTAL_CODE_REGEX = /^\d{4}$/;
 export default function Profile() {
   const { logout } = useAuth();
   const navigate = useNavigate();
-
-  const {
-    wishlistItems,
-    loading: wishlistLoading,
-    error: wishlistError,
-    refreshWishlist,
-  } = useWishlist();
-
-  const { addToCart } = useCart();
-
   const [active, setActive] = useState("profile");
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-
   const [accountInfo, setAccountInfo] = useState(null);
   const [formData, setFormData] = useState(EMPTY_FORM);
-
   const [errors, setErrors] = useState(EMPTY_ERRORS);
-
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
-  // =========================
   // Orders State
-  // =========================
-
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [ordersError, setOrdersError] = useState("");
 
-  // =========================
   // Validate Single Field
-  // =========================
-
   const validateField = (name, value) => {
     const trimmedValue = value.trim();
 
@@ -123,7 +99,6 @@ export default function Profile() {
         if (!/^[A-Za-zÀ-ÿ\u0980-\u09FF\s.'-]+$/.test(trimmedValue)) {
           return "Please enter a valid name.";
         }
-
         return "";
 
       case "phone": {
@@ -152,7 +127,6 @@ export default function Profile() {
         if (trimmedValue.length > 50) {
           return "City must be less than 50 characters.";
         }
-
         return "";
 
       case "postalCode":
@@ -163,7 +137,6 @@ export default function Profile() {
         if (!POSTAL_CODE_REGEX.test(trimmedValue)) {
           return "Postal code must be exactly 4 digits.";
         }
-
         return "";
 
       case "address":
@@ -178,7 +151,6 @@ export default function Profile() {
         if (trimmedValue.length > 250) {
           return "Address must be less than 250 characters.";
         }
-
         return "";
 
       default:
@@ -186,10 +158,7 @@ export default function Profile() {
     }
   };
 
-  // =========================
   // Validate Entire Form
-  // =========================
-
   const validateForm = () => {
     const newErrors = {
       name: validateField("name", formData.name),
@@ -200,17 +169,12 @@ export default function Profile() {
     };
 
     setErrors(newErrors);
-
     return !Object.values(newErrors).some((message) => message);
   };
 
-  // =========================
   // Handle Input Change
-  // =========================
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     let newValue = value;
 
     if (name === "phone") {
@@ -237,10 +201,7 @@ export default function Profile() {
     }
   };
 
-  // =========================
   // Get Account From LocalStorage
-  // =========================
-
   useEffect(() => {
     try {
       const storedAccount = JSON.parse(
@@ -260,10 +221,7 @@ export default function Profile() {
     }
   }, []);
 
-  // =========================
   // Fetch User Profile
-  // =========================
-
   useEffect(() => {
     if (!accountInfo?._id) return;
 
@@ -307,13 +265,10 @@ export default function Profile() {
     getProfile();
   }, [accountInfo?._id]);
 
-  // =========================
-  // Fetch User Orders
-  // =========================
 
+  // Fetch User Orders
   useEffect(() => {
     if (active !== "orders" || !accountInfo?._id) return;
-
     let cancelled = false;
 
     const getOrders = async () => {
@@ -324,12 +279,6 @@ export default function Profile() {
         const res = await axios.get(
           `${API_ORIGIN}/api/v1/order/getSingleUserOrders/${accountInfo._id}`
         );
-
-        // Your backend response:
-        // {
-        //   success: true,
-        //   orders: [...]
-        // }
 
         const userOrders = Array.isArray(res.data.orders)
           ? res.data.orders
@@ -366,10 +315,7 @@ export default function Profile() {
     };
   }, [active, accountInfo?._id]);
 
-  // =========================
   // Update Profile
-  // =========================
-
   const handleSave = async (e) => {
     e.preventDefault();
 
@@ -390,7 +336,6 @@ export default function Profile() {
 
     try {
       setSaving(true);
-
       const normalizedPhone = formData.phone
         .trim()
         .replace(/[\s-]/g, "");
@@ -428,7 +373,6 @@ export default function Profile() {
         postalCode: updatedUser.postalCode || "",
         address: updatedUser.address || "",
       });
-
       setErrors(EMPTY_ERRORS);
 
       const updatedAccountInfo = {
@@ -446,14 +390,12 @@ export default function Profile() {
       );
 
       setAccountInfo(updatedAccountInfo);
-
       window.dispatchEvent(new Event("profileUpdated"));
-
       setSuccess("Profile updated successfully.");
 
       setTimeout(() => {
         setSuccess("");
-      }, 2000);
+      }, 1000);
     } catch (err) {
       console.error("Profile update error:", err);
 
@@ -467,10 +409,7 @@ export default function Profile() {
     }
   };
 
-  // =========================
   // Navigation
-  // =========================
-
   const handleNavClick = (key) => {
     if (key === "logout") {
       setShowLogoutConfirm(true);
@@ -480,10 +419,7 @@ export default function Profile() {
     setActive(key);
   };
 
-  // =========================
   // Logout
-  // =========================
-
   const confirmLogout = () => {
     logout();
     navigate("/");
@@ -493,10 +429,7 @@ export default function Profile() {
     <Container className="py-10">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
 
-        {/* =========================
-            Sidebar
-        ========================= */}
-
+        {/* ========= Sidebar ========== */}
         <aside className="h-fit rounded-2xl border border-ink/10 p-3">
           <nav className="grid grid-cols-2 gap-2 overflow-x-auto md:flex md:flex-col">
             {NAV.map(({ key, label, icon: Icon }) => (
@@ -519,16 +452,8 @@ export default function Profile() {
           </nav>
         </aside>
 
-        {/* =========================
-            Main Section
-        ========================= */}
-
+        {/* ========= Main Section ========== */}
         <section className="rounded-2xl border border-ink/10 p-6 sm:p-8">
-
-          {/* =========================
-              Profile
-          ========================= */}
-
           {active === "profile" && (
             <>
               <h1 className="font-display text-xl font-bold">
@@ -550,8 +475,6 @@ export default function Profile() {
                   noValidate
                 >
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-
-                    {/* Name */}
                     <div>
                       <FormField
                         label="Full name"
@@ -567,8 +490,6 @@ export default function Profile() {
                         </p>
                       )}
                     </div>
-
-                    {/* Email */}
                     <div>
                       <FormField
                         label="Email"
@@ -577,8 +498,6 @@ export default function Profile() {
                         disabled
                       />
                     </div>
-
-                    {/* Phone */}
                     <div>
                       <FormField
                         label="Phone"
@@ -596,8 +515,6 @@ export default function Profile() {
                         </p>
                       )}
                     </div>
-
-                    {/* City */}
                     <div>
                       <FormField
                         label="City"
@@ -613,8 +530,6 @@ export default function Profile() {
                         </p>
                       )}
                     </div>
-
-                    {/* Postal Code */}
                     <div>
                       <FormField
                         label="Postal code"
@@ -634,8 +549,6 @@ export default function Profile() {
                         </p>
                       )}
                     </div>
-
-                    {/* Address */}
                     <div className="sm:col-span-2">
                       <FormField
                         label="Address"
@@ -678,21 +591,14 @@ export default function Profile() {
             </>
           )}
 
-          {/* =========================
-              Orders
-          ========================= */}
-
           {active === "orders" && (
             <>
               <h1 className="font-display text-xl font-bold">
                 Your orders
               </h1>
-
               <p className="mt-1 text-sm text-ink/60">
                 Here you can see all your orders.
               </p>
-
-              {/* Loading */}
               {ordersLoading && (
                 <div className="mt-6 rounded-xl border border-ink/10 p-8 text-center">
                   <p className="text-sm text-ink/50">
@@ -700,8 +606,6 @@ export default function Profile() {
                   </p>
                 </div>
               )}
-
-              {/* Error */}
               {!ordersLoading && ordersError && (
                 <div className="mt-6">
                   <FormMessage type="error">
@@ -709,8 +613,6 @@ export default function Profile() {
                   </FormMessage>
                 </div>
               )}
-
-              {/* Empty */}
               {!ordersLoading &&
                 !ordersError &&
                 orders.length === 0 && (
@@ -719,18 +621,14 @@ export default function Profile() {
                       size={40}
                       className="mx-auto text-ink/20"
                     />
-
                     <p className="mt-3 text-sm font-medium text-ink/60">
                       No orders found
                     </p>
-
                     <p className="mt-1 text-xs text-ink/40">
                       Your order history will appear here.
                     </p>
                   </div>
                 )}
-
-              {/* Orders */}
               {!ordersLoading &&
                 !ordersError &&
                 orders.length > 0 && (
@@ -762,11 +660,6 @@ export default function Profile() {
                           key={order._id}
                           className="overflow-hidden rounded-2xl border border-ink/10 bg-white"
                         >
-
-                          {/* =========================
-                              Order Header
-                          ========================= */}
-
                           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 bg-mist/30 px-4 py-4 sm:px-5">
 
                             <div>
@@ -791,10 +684,6 @@ export default function Profile() {
                               {status}
                             </span>
                           </div>
-
-                          {/* =========================
-                              Products
-                          ========================= */}
                           <div className="px-4 sm:px-5">
                             {products.length > 0 ? (
                               <div className="divide-y divide-ink/5">
@@ -840,13 +729,8 @@ export default function Profile() {
 
                           </div>
 
-                          {/* =========================
-                              Order Summary
-                          ========================= */}
-
                           <div className="border-t border-ink/10 bg-mist/20 px-4 py-4 sm:px-5">
-                            <div className="ml-auto max-w-sm space-y-2 text-sm">
-                              {/* Delivery */}
+                            <div className="space-y-2 text-sm">
                               <div className="flex justify-between gap-4">
                                 <span className="text-ink/60">
                                   Delivery
@@ -860,9 +744,6 @@ export default function Profile() {
                                       )}
                                 </span>
                               </div>
-
-
-                              {/* Total */}
                               <div className="flex justify-between gap-4">
                                 <span className="font-semibold">
                                   Total
@@ -873,39 +754,6 @@ export default function Profile() {
                               </div>
                             </div>
                           </div>
-                          {/* =========================
-                              Transaction
-                          ========================= */}
-
-                          {order.tranId && (
-                            <div className="flex justify-between border-t border-ink/10 px-4 py-3 sm:px-5">
-                              <p className="text-xs text-ink/40">
-                                Transaction ID:{" "}
-                                {
-                                  order.paymentMethod == "cod" ? 'Not Avaiable' : 
-                                  <span className="font-medium text-ink/60">
-                                  {order.tranId}
-                                </span>
-                                }
-                              </p>
-                              
-                              {/* Payment Method */}
-                              {order.paymentMethod && (
-                                <div className="text-xs">
-                               {
-                                order.paymentMethod == "cod" ?
-                                   <span className="text-ink/60">
-                                   Cash On Delivery <span className="font-bold">({order.paymentMethod})</span> 
-                                  </span> :
-                                     <span className="text-ink/60">
-                                    Paid By <span className="font-bold">{order.paymentMethod}</span> 
-                                  </span>
-                               }
-                                </div>
-                              )}
-                            </div>
-                          )}
-
                         </div>
                       );
                     })}
@@ -918,25 +766,16 @@ export default function Profile() {
         </section>
       </div>
 
-      {/* =========================
-          Logout Confirmation
-      ========================= */}
-
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
-
           <div className="w-full max-w-sm rounded-2xl bg-white p-6">
-
             <h3 className="font-display text-lg font-bold">
               Log out?
             </h3>
-
             <p className="mt-2 text-sm text-ink/60">
               You'll need to sign in again to access your account.
             </p>
-
             <div className="mt-6 flex gap-3">
-
               <button
                 type="button"
                 onClick={() => setShowLogoutConfirm(false)}
@@ -944,7 +783,6 @@ export default function Profile() {
               >
                 Cancel
               </button>
-
               <button
                 type="button"
                 onClick={confirmLogout}
@@ -952,7 +790,6 @@ export default function Profile() {
               >
                 Log out
               </button>
-
             </div>
           </div>
         </div>
