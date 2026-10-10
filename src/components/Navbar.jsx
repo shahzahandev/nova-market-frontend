@@ -168,9 +168,9 @@ export default function Navbar() {
   useEffect(() => {
     const getCategories = async () => {
       try {
-        const response = await fetch(`${API_ORIGIN}/api/v1/product/allCategory`);
+        const response = await fetch(`${API_ORIGIN}/api/v1/category/allActiveCategory`);
         const data = await response.json();
-        setCategories(data.allCategory || []);
+        setCategories(data.allActiveCategory || []);
       } catch (error) {
         console.log("Category fetch error:", error);
       }
