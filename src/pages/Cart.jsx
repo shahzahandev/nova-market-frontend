@@ -35,6 +35,10 @@ export default function Cart() {
 
   const { cart, loading, totalAmount, updateQuantity, removeItem, clearCart } = useCart();
 
+
+
+
+
   const [busyId, setBusyId] = useState(null);
   const [clearing, setClearing] = useState(false);
   const [errors, setErrors] = useState({}); // { [cartItemId]: "error message" }

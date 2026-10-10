@@ -31,8 +31,17 @@ const inputClass = (hasError) =>
   }`;
 
 export default function Checkout() {
-  const { cart, loading, totalAmount, fetchCart } = useCart();
-  const userId = getUserId();
+const {
+  cart,
+  loading,
+  refreshing,
+  totalAmount,
+  fetchCart,
+} = useCart();  const userId = getUserId();
+
+    useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
 
   const [form, setForm] = useState({
     name: "",
@@ -473,7 +482,7 @@ export default function Checkout() {
 
           <button
             type="submit"
-            disabled={submitting || !settings}
+            disabled={submitting || !settings || refreshing}
             className="mt-6 h-12 w-full rounded-full bg-ink text-sm font-semibold text-white hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {submitting ? "Placing order..." : "Confirm Order"}
