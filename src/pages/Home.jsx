@@ -227,23 +227,15 @@ export default function Home() {
   useEffect(() => {
     const getCategories = async () => {
       try {
-        const response = await axios.get(
-          `${API_ORIGIN}/api/v1/product/allCategory`
-        );
+        const response = await axios.get(`${API_ORIGIN}/api/v1/category/allActiveCategory`);
 
-        const list = (
-          response.data?.allCategory || []
-        )
+        const list = (response.data?.allActiveCategory || [] )
           .map((category) => category.name)
           .filter(Boolean);
 
         setCategories(list);
       } catch (error) {
-        console.error(
-          "Category fetch error:",
-          error
-        );
-
+        console.error("Category fetch error:", error);
         setCategories([]);
       }
     };

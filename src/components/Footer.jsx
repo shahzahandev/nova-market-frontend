@@ -20,7 +20,6 @@ export default function Footer() {
             { name: "About", path: "/about" },
             { name: "Contact Us", path: "/contact" },
             { name: "Shipping", path: "/shhiping" },
-            { name: "Careers", path: "/careers" },
             { name: "Privacy Policy", path: "/privacyPolicy" },
             { name: "Terms", path: "/terms" },
           ]}
@@ -57,47 +56,70 @@ export default function Footer() {
         </div>
 
         {/* Company Information */}
-        <div className="col-span-1 sm:col-span-1">
-          <p className="font-display text-2xl md:text-4xl font-bold">
-            {(() => {
-              const name = storeInfo?.storeName || "";
-              const words = name.split(" ");
-              const firstWord = words.shift();
-              const remainingWords = words.join(" ");
+      {/* Company Information */}
+<div className="col-span-1 sm:col-span-1">
+  <p className="font-display text-2xl md:text-4xl font-bold">
+    {(() => {
+      const name = storeInfo?.storeName || "";
+      const words = name.split(" ");
+      const firstWord = words.shift();
+      const remainingWords = words.join(" ");
 
-              return (
-                <>
-                  {firstWord}
-                  {remainingWords && (
-                    <span className="text-brand-500">{remainingWords}</span>
-                  )}
-                </>
-              );
-            })()}
-          </p>
+      return (
+        <>
+          {firstWord}
+          {remainingWords && (
+            <span className="text-brand-500">{remainingWords}</span>
+          )}
+        </>
+      );
+    })()}
+  </p>
 
-          <p className="font-display text-lg md:text-2xl font-bold">
-            Stay Connected
-          </p>
+  <p className="font-display text-lg md:text-2xl font-bold">
+    Stay Connected
+  </p>
 
-          <p className="mt-1 md:mt-2 max-w-xs text-sm text-slate-700 mx-auto">
-            Head Office: House-12 Road-4, Block-B, Niketon, Gulshan, Dhaka 1212
-          </p>
+  {storeInfo?.storeAddress && (
+    <p className="mt-1 md:mt-2 max-w-xs text-sm text-slate-700 mx-auto">
+      Head Office: {storeInfo.storeAddress}
+    </p>
+  )}
 
-          <p className="flex items-center justify-center space-x-1 m-1 max-w-xs text-sm text-slate-700 mx-auto">
-     <p>Email:</p>
-            <p>{storeInfo?.storeEmail || ""}</p>
-          </p>
-          <p className="mt-1 max-w-xs text-sm text-slate-700 mx-auto">
-            01737-954516 | 01404-753495
-          </p>
-        </div>
+  {storeInfo?.storePhone?.length > 0 && (
+    <p className="mt-1 max-w-xs text-sm text-slate-700 mx-auto">
+      {storeInfo.storePhone.join(" | ")}
+    </p>
+  )}
+
+  {storeInfo?.storeEmail && (
+    <p className="mt-1 max-w-xs text-sm text-slate-700 mx-auto">
+      Email: {storeInfo.storeEmail}
+    </p>
+  )}
+</div>
       </Container>
 
       {/* Copyright */}
       <div className="border-t border-white/10 py-6">
         <Container className="flex flex-col items-center justify-center gap-2 text-xs text-slate-800 sm:flex-row">
-          <p>©2026 NovaMarket. All rights reserved.</p>
+          <p>©2026
+             {(() => {
+      const name = storeInfo?.storeName || "";
+      const words = name.split(" ");
+      const firstWord = words.shift();
+      const remainingWords = words.join(" ");
+
+      return (
+        <>
+          {firstWord}
+          {remainingWords && (
+            <span className="">{remainingWords}</span>
+          )}
+        </>
+      );
+    })()}
+            . All rights reserved.</p>
         </Container>
       </div>
     </footer>

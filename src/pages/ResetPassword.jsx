@@ -1,16 +1,24 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
+
 import AuthLayout from "../components/AuthLayout";
 import {
   PasswordField,
   SubmitButton,
   FormMessage,
 } from "../components/FormField";
-import axios from "axios";
+import { useStoreInfo } from "../context/StoreInfoContext";
+
+const RESET_URL =
+  "https://nova-market-backend-2.onrender.com/api/v1/auth/resetpassword";
 
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
+  const { storeInfo } = useStoreInfo();
+
+  const storeName = storeInfo?.storeName || "Nova Market";
 
   const [formData, setFormData] = useState({
     newPassword: "",
@@ -21,48 +29,29 @@ export default function ResetPassword() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // =========================
   // Clean Token
-  // =========================
-  const cleanToken = token
-    ? decodeURIComponent(token).trim()
-    : "";
+  const cleanToken = token ? decodeURIComponent(token).trim() : "";
 
-  // =========================
-  // Handle Input Change
-  // =========================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     setError("");
     setSuccess("");
   };
 
-  // =========================
-  // Handle Submit
-  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     setError("");
     setSuccess("");
 
-    // =========================
-    // Token Validation
-    // =========================
     if (!cleanToken) {
       setError("Invalid or missing password reset token.");
       return;
     }
 
-    // =========================
-    // Password Validation
-    // =========================
     if (!formData.newPassword || !formData.confirmPassword) {
       setError("Please fill in both password fields.");
       return;
@@ -81,23 +70,11 @@ export default function ResetPassword() {
     try {
       setLoading(true);
 
-      // =========================
-      // Backend API
-      // =========================
-      const res = await axios.post(`https://nova-market-backend-2.onrender.com/api/v1/auth/resetpassword/${token}`,
-        
-        {
-          newPassword: formData.newPassword,
-          confirmPassword: formData.confirmPassword,
-        }
+      const res = await axios.post(`${RESET_URL}/${token}`, {
+        newPassword: formData.newPassword,
+        confirmPassword: formData.confirmPassword,
+      });
 
-      );
-               console.log(res)
-
-
-      // =========================
-      // Success
-      // =========================
       setSuccess(
         res.data?.message ||
           "Password updated successfully. Redirecting to sign in..."
@@ -108,7 +85,6 @@ export default function ResetPassword() {
         confirmPassword: "",
       });
 
-      // Redirect after success
       setTimeout(() => {
         navigate("/signin");
       }, 2000);
@@ -126,14 +102,11 @@ export default function ResetPassword() {
 
   return (
     <AuthLayout
-      eyebrow="Account recovery"
+      eyebrow={`${storeName} account recovery`}
       title="Set a new password"
       subtitle="Make it strong — you'll use this to sign in from now on."
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* =========================
-            New Password
-        ========================= */}
         <PasswordField
           label="New password"
           name="newPassword"
@@ -142,9 +115,6 @@ export default function ResetPassword() {
           placeholder="At least 8 characters"
         />
 
-        {/* =========================
-            Confirm Password
-        ========================= */}
         <PasswordField
           label="Confirm new password"
           name="confirmPassword"
@@ -153,28 +123,12 @@ export default function ResetPassword() {
           placeholder="Re-enter your new password"
         />
 
-        {/* =========================
-            Error
-        ========================= */}
         {error && <FormMessage>{error}</FormMessage>}
 
-        {/* =========================
-            Success
-        ========================= */}
-        {success && (
-          <FormMessage type="success">
-            {success}
-          </FormMessage>
-        )}
+        {success && <FormMessage type="success">{success}</FormMessage>}
 
-        {/* =========================
-            Submit
-        ========================= */}
-        <SubmitButton loading={loading}>
-          Reset password
-        </SubmitButton>
+        <SubmitButton loading={loading}>Reset password</SubmitButton>
       </form>
     </AuthLayout>
   );
 }
-

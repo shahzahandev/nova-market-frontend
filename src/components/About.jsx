@@ -1,7 +1,12 @@
 import React from "react";
 import Container from "./Container";
+import BrandName from "./BrandName";
+import { useStoreInfo } from "../context/StoreInfoContext";
 
 const About = () => {
+  const { storeInfo } = useStoreInfo();
+  const storeName = storeInfo?.storeName || "NovaMarket";
+
   return (
     <div className="bg-gray-100 py-10">
       <Container>
@@ -11,11 +16,11 @@ const About = () => {
             {/* About Heading */}
             <div className="text-start">
               <h2 className="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">
-                About Nova<span className="text-brand-500">Market</span>
+                About <BrandName name={storeName} />
               </h2>
 
-              <p className=" text-base leading-7 text-gray-600">
-                NovaMarket is a modern and user-friendly online shopping
+              <p className="text-base leading-7 text-gray-600">
+                {storeName} is a modern and user-friendly online shopping
                 platform designed to make your shopping experience simple,
                 convenient, and enjoyable. From discovering products to
                 placing an order, we aim to provide a smooth and reliable
@@ -30,7 +35,7 @@ const About = () => {
               </h3>
 
               <p className="text-base leading-7 text-gray-600">
-                NovaMarket was created with a simple goal — to make online
+                {storeName} was created with a simple goal — to make online
                 shopping easier and more accessible. We believe customers
                 should be able to discover quality products, compare their
                 options, and complete their purchases without unnecessary
@@ -116,7 +121,7 @@ const About = () => {
               <p className="text-base leading-7 text-gray-600">
                 Our customers are at the heart of everything we do. From a
                 simple and intuitive interface to a smooth checkout process,
-                every part of NovaMarket is designed with customer convenience
+                every part of {storeName} is designed with customer convenience
                 in mind.
               </p>
 
@@ -131,7 +136,7 @@ const About = () => {
               <p className="text-base font-medium leading-7 text-gray-700">
                 Thank you for choosing{" "}
                 <span className="font-bold">
-                  Nova<span className="text-brand-500">Market</span>
+                  <BrandName name={storeName} />
                 </span>
                 . We look forward to making your online shopping experience
                 better, easier, and more enjoyable.

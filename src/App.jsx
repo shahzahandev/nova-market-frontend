@@ -32,7 +32,6 @@ import PaymentCancel from "./pages/PaymentCancel";
 
 import Terms from "./pages/Terms";
 import Shhiping from "./pages/Shipping";
-import Careers from "./pages/Careers";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 
@@ -74,7 +73,6 @@ export default function App() {
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/shhiping" element={<Shhiping />} />
                 <Route path="/privacyPolicy" element={<PrivacyPolicy />} />
-                <Route path="/careers" element={<Careers />} />
               </Route>
 
               <Route path="/signup" element={<SignUp />} />

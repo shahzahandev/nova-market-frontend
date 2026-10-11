@@ -5,6 +5,7 @@ import axios from "axios";
 import Container from "../components/Container";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
+import { useStoreInfo } from "../context/StoreInfoContext";
 
 const MAX_THUMBNAILS = 5;
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
@@ -47,6 +48,15 @@ export default function ProductDetails() {
     const [showToast, setShowToast] = useState(false);
     const [adding, setAdding] = useState(false);
     const [cartError, setCartError] = useState("");
+    
+    const { storeInfo } = useStoreInfo();
+
+    const returnPolicy = (
+    storeInfo?.storePolicy?.returnPolicy ||
+    storeInfo?.returnPolicy ||
+    ""
+  ).trim();
+    
 
     // Fetch Product
     useEffect(() => {
@@ -462,7 +472,7 @@ export default function ProductDetails() {
                     <div className="mt-8 grid grid-cols-3 gap-3 border-y border-ink/10 py-6 text-center text-xs text-ink/60">
                         <Feature icon={Truck} label="Fast delivery" />
                         <Feature icon={ShieldCheck} label="Secure payment" />
-                        <Feature icon={RotateCcw} label="7-day returns" />
+                        <Feature icon={RotateCcw} label={returnPolicy} />
                     </div>
                 </div>
             </div>

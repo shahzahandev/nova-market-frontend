@@ -3,24 +3,35 @@ import { Link, useParams } from "react-router-dom";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 import axios from "axios";
 
+import BrandName from "../components/BrandName";
+import { useStoreInfo } from "../context/StoreInfoContext";
+
+const VERIFY_URL = "https://nova-market-backend-2.onrender.com/api/v1/auth/verifyemail";
+
 export default function EmailVerify() {
   const { token } = useParams();
+  const { storeInfo } = useStoreInfo();
+
+  const storeName = storeInfo?.storeName || "Nova Market";
+
   const [status, setStatus] = useState("verifying"); // verifying | success | error
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     async function verify() {
       try {
-        const res = await axios.post(`https://nova-market-backend-2.onrender.com/api/v1/auth/verifyemail/${token}`); 
+        const res = await axios.post(`${VERIFY_URL}/${token}`);
         setStatus("success");
         setMessage(res.data?.message || "Your email has been verified.");
-        // console.log(res);
-        
       } catch (err) {
         setStatus("error");
-        setMessage(err.response?.data?.message || "This verification link is invalid or expired.");
+        setMessage(
+          err.response?.data?.message ||
+            "This verification link is invalid or expired."
+        );
       }
     }
+
     if (token) verify();
   }, [token]);
 
@@ -28,20 +39,28 @@ export default function EmailVerify() {
     <div className="flex min-h-screen items-center justify-center bg-mist px-4">
       <div className="w-full max-w-sm rounded-2xl bg-white p-10 text-center shadow-card">
         <Link to="/" className="font-display text-lg font-bold">
-          Nova<span className="text-brand-500">Market</span>
+          <BrandName name={storeName} />
         </Link>
 
         <div className="mt-8">
           {status === "verifying" && (
             <>
-              <Loader2 size={40} className="mx-auto animate-spin text-brand-500" />
-              <h1 className="mt-4 font-display text-xl font-bold">Verifying your email...</h1>
+              <Loader2
+                size={40}
+                className="mx-auto animate-spin text-brand-500"
+              />
+              <h1 className="mt-4 font-display text-xl font-bold">
+                Verifying your email...
+              </h1>
             </>
           )}
+
           {status === "success" && (
             <>
               <CheckCircle2 size={44} className="mx-auto text-emerald-500" />
-              <h1 className="mt-4 font-display text-xl font-bold">You're verified!</h1>
+              <h1 className="mt-4 font-display text-xl font-bold">
+                You're verified!
+              </h1>
               <p className="mt-2 text-sm text-ink/60">{message}</p>
               <Link
                 to="/signin"
@@ -51,10 +70,13 @@ export default function EmailVerify() {
               </Link>
             </>
           )}
+
           {status === "error" && (
             <>
               <XCircle size={44} className="mx-auto text-red-500" />
-              <h1 className="mt-4 font-display text-xl font-bold">Verification failed</h1>
+              <h1 className="mt-4 font-display text-xl font-bold">
+                Verification failed
+              </h1>
               <p className="mt-2 text-sm text-ink/60">{message}</p>
               <Link
                 to="/signup"

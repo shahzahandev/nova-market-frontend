@@ -11,12 +11,7 @@ export default function WhatsAppButton() {
   useEffect(() => {
     const getWhatsApp = async () => {
       try {
-        const response = await axios.get(
-          `${API_ORIGIN}/getWhatsapp`
-        );
-
-        console.log("WhatsApp API Response:", response.data);
-
+        const response = await axios.get(`${API_ORIGIN}/getWhatsapp`);
         if (response.data.success) {
           setWhatsapp(response.data.data);
         }

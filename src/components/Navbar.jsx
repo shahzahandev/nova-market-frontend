@@ -16,6 +16,7 @@ import {
   LogIn,
   Plus,
   ShoppingCart,
+  Phone,
 } from "lucide-react";
 
 import Container from "./Container";
@@ -470,10 +471,10 @@ export default function Navbar() {
 
             <div className="flex items-center gap-5">
 
-              <a href={`mailto:${storeEmail}`}
+              <a href="/contact"
                 className="flex items-center gap-1.5 hover:text-ink"
               >
-                <Mail size={13} />
+                <Phone size={13} />
                 Contact
               </a>
 

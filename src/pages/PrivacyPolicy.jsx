@@ -1,13 +1,11 @@
 import React from "react";
 import Container from "../components/Container";
+import { useStoreInfo } from "../context/StoreInfoContext";
 
-// TODO: replace with your real support email
-const SUPPORT_EMAIL = "novamarket@gmail.com";
-
-const sections = [
+const getSections = (storeName) => [
   {
     title: "Information We Collect",
-    text: "When you use NovaMarket, we may collect the following information:",
+    text: `When you use ${storeName}, we may collect the following information:`,
     list: [
       "Personal details such as your name, email address, phone number, and delivery address.",
       "Order details such as the products you buy, order history, and wishlist items.",
@@ -49,23 +47,25 @@ const sections = [
 ];
 
 const PrivacyPolicy = () => {
+  const { storeInfo } = useStoreInfo();
+
+  const storeName = storeInfo?.storeName || "NovaMarket";
+  const supportEmail = storeInfo?.storeEmail || "";
+  const sections = getSections(storeName);
+
   return (
     <div className="bg-gray-100 py-10">
       <Container>
         <section className="bg-white py-8">
           <div className="px-2 sm:px-4 lg:px-6">
-
             {/* Heading */}
             <div className="text-start">
               <h2 className="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">
                 Privacy <span className="text-brand-500">Policy</span>
               </h2>
-
-              <p className="text-sm text-gray-500">Last updated: October 2026</p>
-
               <p className="mt-4 text-base leading-7 text-gray-600">
                 Your privacy matters to us. This policy explains what
-                information NovaMarket collects, how we use it, and the
+                information {storeName} collects, how we use it, and the
                 choices you have.
               </p>
             </div>
@@ -92,19 +92,20 @@ const PrivacyPolicy = () => {
             ))}
 
             {/* Closing Message */}
-            <div className="mt-10 border-l-4 border-brand-500 bg-gray-50 px-5 py-5">
-              <p className="text-base font-medium leading-7 text-gray-700">
-                Questions about this policy? Contact us at{" "}
-                <a
-                  href={`mailto:${SUPPORT_EMAIL}`}
-                  className="font-bold text-brand-500 hover:underline"
-                >
-                  {SUPPORT_EMAIL}
-                </a>
-                .
-              </p>
-            </div>
-
+            {supportEmail && (
+              <div className="mt-10 border-l-4 border-brand-500 bg-gray-50 px-5 py-5">
+                <p className="text-base font-medium leading-7 text-gray-700">
+                  Questions about this policy? Contact us at{" "}
+                  <a
+                    href={`mailto:${supportEmail}`}
+                    className="font-bold text-brand-500 hover:underline"
+                  >
+                    {supportEmail}
+                  </a>
+                  .
+                </p>
+              </div>
+            )}
           </div>
         </section>
       </Container>

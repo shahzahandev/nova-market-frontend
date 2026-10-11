@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import api from "../api/axios";
-import AuthLayout from "../components/AuthLayout";
-import { FormField, SubmitButton, FormMessage } from "../components/FormField";
 import axios from "axios";
 
+import AuthLayout from "../components/AuthLayout";
+import { FormField, SubmitButton, FormMessage } from "../components/FormField";
+import { useStoreInfo } from "../context/StoreInfoContext";
+
+const FORGOT_URL = "https://nova-market-backend-2.onrender.com/api/v1/auth/forgotPassword";
+
 export default function ForgotPassword() {
+  const { storeInfo } = useStoreInfo();
+  const storeName = storeInfo?.storeName || "";
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -16,15 +21,15 @@ export default function ForgotPassword() {
     setError("");
     setSuccess("");
 
-    if (!email) return setError("Please enter your email address.");
+    if (!email.trim()) return setError("Please enter your email address.");
 
     try {
       setLoading(true);
-      const res = await axios.post("https://nova-market-backend-2.onrender.com/api/v1/auth/forgotPassword", { email });
+      const res = await axios.post(FORGOT_URL, { email: email.trim() });
       setSuccess(res.data.message);
-      
+
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong. Please try again.");
+      setError( err.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -32,7 +37,7 @@ export default function ForgotPassword() {
 
   return (
     <AuthLayout
-      eyebrow="Account recovery"
+      eyebrow={`${storeName} account recovery`}
       title="Forgot your password?"
       subtitle="Enter your email and we'll send you a reset link."
     >
@@ -41,7 +46,10 @@ export default function ForgotPassword() {
           label="Email address"
           type="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            setError("");
+          }}
           placeholder="you@example.com"
         />
 

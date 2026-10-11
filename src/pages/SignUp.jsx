@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import AuthLayout from "../components/AuthLayout";
 import { FormField, PasswordField, SubmitButton, FormMessage } from "../components/FormField";
-import axios from "axios";
+import { useStoreInfo } from "../context/StoreInfoContext";
+
+const REGISTER_URL = "https://nova-market-backend-2.onrender.com/api/v1/auth/register";
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const { storeInfo } = useStoreInfo();
+  const storeName = storeInfo?.storeName || "Nova Market";
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,55 +26,48 @@ export default function SignUp() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
 
-    if (error) { setError(""); }
+    if (error) setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("")
+    setSuccess("");
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.password ||
+      !formData.confirmPassword
+    ) {
       return setError("Please fill in all fields.");
     }
+
+    if (!isValidEmail(formData.email.trim())) {
+      return setError("Please enter a valid email address.");
+    }
+
     if (formData.password.length < 8) {
       return setError("Password must be at least 8 characters.");
     }
+
     if (formData.password !== formData.confirmPassword) {
       return setError("Passwords do not match.");
     }
+
     if (!formData.terms) {
       return setError("Please accept the Terms & Conditions.");
     }
-    // =============================
-    // Email Validation Function
-    // =============================
-    const isValidEmail = (email) => {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return emailRegex.test(email);
-    };
-
-  if (!isValidEmail(formData.email)) {
-    return setError("Please enter a valid email address.");
-  }
 
     try {
       setLoading(true);
-    let data =  await axios.post(`https://nova-market-backend-2.onrender.com/api/v1/auth/register`, formData)
-    console.log(data);
-    
-      setSuccess("Account created. Please check your email to verify your account. And login.")
-      setTimeout(() => {
-        navigate("/signin",
-          {
-            state: {
-              justRegistered: true
-            }
-          }
-        )
-      }, 1500);
+      await axios.post(REGISTER_URL, formData);
+      setSuccess("Account created. Please check your email to verify your account. And login.");
 
       setFormData({
         name: "",
@@ -76,13 +76,13 @@ export default function SignUp() {
         confirmPassword: "",
         terms: false,
       });
-      console.log(formData);
-      
-    } catch (error) {
-    const message =
-    error.response?.data?.message ||
-    "Something went wrong. Please try again.";
-  setError(message);
+
+      setTimeout(() => {
+        navigate("/signin", { state: { justRegistered: true } });
+      }, 1500);
+    } catch (err) {
+      const message = err.response?.data?.message || "Something went wrong. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -90,10 +90,11 @@ export default function SignUp() {
 
   return (
     <AuthLayout
-      eyebrow="Join Nova Market"
+      eyebrow={`Join ${storeName}`}
       title="Create your account"
       subtitle="Start shopping in under a minute."
     >
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <FormField
           label="Full name"
@@ -133,18 +134,37 @@ export default function SignUp() {
             onChange={handleChange}
             className="mt-0.5 h-4 w-4 rounded border-ink/20 text-brand-500 focus:ring-brand-400"
           />
-          I agree to the <a href="#" className="font-medium text-ink underline">Terms</a> and{" "}
-          <a href="#" className="font-medium text-ink underline">Privacy Policy</a>.
+          <span>
+            I agree to the{" "}
+            <Link
+              to="/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ink underline"
+            >
+              Terms
+            </Link>{" "}
+            and{" "}
+            <Link
+              to="/privacyPolicy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ink underline"
+            >
+              Privacy Policy
+            </Link>
+            .
+          </span>
         </label>
 
         <FormMessage>
           {error && (
-            <div className=" bg-red-50 px-4 py-3 text-sm text-red-600">
+            <div className="bg-red-50 px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           )}
           {success && (
-            <div className=" bg-green-100 px-4 py-3 text-sm text-green-600">
+            <div className="bg-green-100 px-4 py-3 text-sm text-green-600">
               {success}
             </div>
           )}

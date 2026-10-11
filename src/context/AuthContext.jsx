@@ -20,9 +20,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     if (data?.token) localStorage.setItem("token", data.token);
     setUserInfo(data);
-
-    // Lets WishlistContext (and anything else listening) know in the
-    // SAME tab, since "storage" only fires in other tabs.
     window.dispatchEvent(new Event("login"));
   };
 

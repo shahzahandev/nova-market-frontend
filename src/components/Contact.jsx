@@ -1,8 +1,13 @@
 import React, { useState } from "react";
 import { SendHorizontal } from "lucide-react";
 import Container from "../components/Container";
+import { useStoreInfo } from "../context/StoreInfoContext";
+import BrandName from "./BrandName";
+
 
 const Contact = () => {
+  const { storeInfo } = useStoreInfo();
+  const storeName = storeInfo?.storeName || "";
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -105,9 +110,10 @@ const Contact = () => {
                 <p className="text-base leading-7 text-gray-600">
                   Have a question, feedback, or need help with an order? Fill
                   out the form below and our team at{" "}
-                  <span className="font-bold">Nova</span>
-                  <span className="text-brand-500">Market</span> will get
-                  back to you as soon as possible.
+                  <span className="font-bold">
+                    <BrandName name={storeName} />
+                  </span>{" "}
+                  will get back to you as soon as possible.
                 </p>
               </div>
 
@@ -125,11 +131,10 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Name"
-                      className={`w-full border ${
-                        errors.name
+                      className={`w-full border ${errors.name
                           ? "border-red-500"
                           : "border-gray-300"
-                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
                     />
 
                     {errors.name && (
@@ -147,11 +152,10 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="Email"
-                      className={`w-full border ${
-                        errors.email
+                      className={`w-full border ${errors.email
                           ? "border-red-500"
                           : "border-gray-300"
-                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
                     />
 
                     {errors.email && (
@@ -169,11 +173,10 @@ const Contact = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="Phone Number"
-                      className={`w-full border ${
-                        errors.phone
+                      className={`w-full border ${errors.phone
                           ? "border-red-500"
                           : "border-gray-300"
-                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
                     />
 
                     {errors.phone && (
@@ -191,11 +194,10 @@ const Contact = () => {
                       onChange={handleChange}
                       placeholder="Comment"
                       rows={5}
-                      className={`w-full resize-none border ${
-                        errors.comment
+                      className={`w-full resize-none border ${errors.comment
                           ? "border-red-500"
                           : "border-gray-300"
-                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
                     />
 
                     {errors.comment && (
