@@ -28,31 +28,35 @@ export default function Home() {
   // Banner images
   const [bannerImages, setBannerImages] = useState([]);
 
+  // Hero texts
+  const [hero, setHero] = useState({
+    eyebrow: "",
+    headingFirst: "",
+    headingSecond: "",
+    paragraph: "",
+    buttonText: "",
+  });
+
+  // API response ashar por-i hero text dekhabe ar animation chalabe
+  const [heroReady, setHeroReady] = useState(false);
+
   // Fetch Banner
   useEffect(() => {
     const fetchBanner = async () => {
       try {
-        const response = await axios.get(
-          GET_HERO_SLIDER_URL
-        );
+        const response = await axios.get(GET_HERO_SLIDER_URL);
 
-        const images =
-          response.data?.data?.images || [];
+        const data = response.data?.data || {};
+        const images = Array.isArray(data.images) ? data.images : [];
 
         const imageUrls = images
           .map((image) => {
-            if (
-              typeof image === "object" &&
-              image?.url
-            ) {
+            if (typeof image === "object" && image?.url) {
               return image.url;
             }
 
             // Legacy support
-            if (
-              typeof image === "string" &&
-              image.startsWith("http")
-            ) {
+            if (typeof image === "string" && image.startsWith("http")) {
               return image;
             }
 
@@ -66,13 +70,19 @@ export default function Home() {
           .filter(Boolean);
 
         setBannerImages(imageUrls);
-      } catch (error) {
-        console.error(
-          "Banner fetch error:",
-          error
-        );
 
+        setHero({
+          eyebrow: data.eyebrow || "",
+          headingFirst: data.headingFirst || "",
+          headingSecond: data.headingSecond || "",
+          paragraph: data.paragraph || "",
+          buttonText: data.buttonText || "",
+        });
+      } catch (error) {
+        console.error("Banner fetch error:", error);
         setBannerImages([]);
+      } finally {
+        setHeroReady(true);
       }
     };
 
@@ -81,6 +91,8 @@ export default function Home() {
 
   // Hero GSAP animation
   useEffect(() => {
+    if (!heroReady) return;
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         defaults: {
@@ -124,7 +136,7 @@ export default function Home() {
     }, heroRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [heroReady]);
 
   // Get Products
   useEffect(() => {
@@ -229,7 +241,7 @@ export default function Home() {
       try {
         const response = await axios.get(`${API_ORIGIN}/api/v1/category/allActiveCategory`);
 
-        const list = (response.data?.allActiveCategory || [] )
+        const list = (response.data?.allActiveCategory || [])
           .map((category) => category.name)
           .filter(Boolean);
 
@@ -253,48 +265,56 @@ export default function Home() {
       >
         <Container className="grid items-center gap-8 py-6 sm:py-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-12 lg:py-6">
           <div>
-            <p
-              data-hero-eyebrow
-              className="font-mono text-xs uppercase tracking-[0.2em] text-brand-300"
-            >
-              New season, new drops
-            </p>
+            {heroReady && (
+              <>
+                {hero.eyebrow && (
+                  <p
+                    data-hero-eyebrow
+                    className="font-mono text-xs uppercase tracking-[0.2em] text-brand-300"
+                  >
+                    {hero.eyebrow}
+                  </p>
+                )}
 
-            <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
-              <span className="block overflow-hidden">
-                <span data-hero-word className="block">
-                  Everyday gear,
-                </span>
-              </span>
+                {(hero.headingFirst || hero.headingSecond) && (
+                  <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
+                    {hero.headingFirst && (
+                      <span className="block overflow-hidden">
+                        <span data-hero-word className="block text-white">
+                          {hero.headingFirst}
+                        </span>
+                      </span>
+                    )}
 
-              <span className="block overflow-hidden">
-                <span data-hero-word className="block text-brand-400">
-                  designed with intent.
-                </span>
-              </span>
-            </h1>
+                    {hero.headingSecond && (
+                      <span className="block overflow-hidden">
+                        <span data-hero-word className="block text-brand-300">
+                          {hero.headingSecond}
+                        </span>
+                      </span>
+                    )}
+                  </h1>
+                )}
 
-            <p data-hero-sub className="mt-6 max-w-md text-white/60">
-              Curated tech and lifestyle products from makers who obsess over the
-              details, so you don't have to.
-            </p>
+                {hero.paragraph && (
+                  <p data-hero-sub className="mt-6 max-w-md text-white/60">
+                    {hero.paragraph}
+                  </p>
+                )}
 
-            <div data-hero-cta className="mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/products"
-                className="flex h-12 items-center gap-2 rounded-full bg-brand-400 px-6 text-sm font-semibold text-ink transition hover:bg-brand-300"
-              >
-                Shop the collection
-                <ArrowRight size={16} />
-              </Link>
-
-              <Link
-                to="/products"
-                className="flex h-12 items-center rounded-full border border-white/20 px-6 text-sm font-semibold text-white hover:bg-white/5"
-              >
-                Explore categories
-              </Link>
-            </div>
+                {hero.buttonText && (
+                  <div data-hero-cta className="mt-8 flex flex-wrap gap-3 capitalize">
+                    <Link
+                      to="/products"
+                      className="flex h-12 items-center gap-2 rounded-full bg-brand-400 px-6 text-sm font-semibold text-ink transition hover:bg-brand-300"
+                    >
+                      {hero.buttonText}
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* ================= HERO SLIDER ================= */}
@@ -310,8 +330,8 @@ export default function Home() {
         </Container>
       </section>
 
-      <NoticeBoard/>
-      
+      <NoticeBoard />
+
       {/* new */}
       <section className="py-16">
         <Container>
@@ -534,7 +554,6 @@ export default function Home() {
       {/* ============  ABOUT ================ */}
       <About />
       <Contact />
-
     </div>
   );
 }

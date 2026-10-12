@@ -1,13 +1,17 @@
+
 import React, { useState } from "react";
+import axios from "axios";
 import { SendHorizontal } from "lucide-react";
 import Container from "../components/Container";
 import { useStoreInfo } from "../context/StoreInfoContext";
 import BrandName from "./BrandName";
 
+const API_URL = "https://nova-market-backend-2.onrender.com/api/v1/message/createMessage";
 
 const Contact = () => {
   const { storeInfo } = useStoreInfo();
   const storeName = storeInfo?.storeName || "";
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -16,6 +20,9 @@ const Contact = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [serverError, setServerError] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,51 +32,60 @@ const Contact = () => {
       [name]: value,
     }));
 
-    // Remove error while typing
     setErrors((prev) => ({
       ...prev,
       [name]: "",
     }));
+
+    setSuccessMessage("");
+    setServerError("");
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = "Name is required.";
     } else if (formData.name.trim().length < 2) {
       newErrors.name = "Name must be at least 2 characters.";
+    } else if (formData.name.trim().length > 100) {
+      newErrors.name = "Name cannot exceed 100 characters.";
     }
 
-    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = "Email is required.";
     } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
     ) {
       newErrors.email = "Please enter a valid email address.";
+    } else if (formData.email.trim().length > 254) {
+      newErrors.email = "Email is too long.";
     }
 
-    // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = "Phone number is required.";
-    } else if (!/^(?:\+8801|01)[3-9]\d{8}$/.test(formData.phone)) {
+    } else if (
+      !/^(?:\+8801|01)[3-9]\d{8}$/.test(formData.phone.trim())
+    ) {
       newErrors.phone = "Please enter a valid Bangladesh phone number.";
     }
 
-    // Comment validation
     if (!formData.comment.trim()) {
       newErrors.comment = "Comment is required.";
     } else if (formData.comment.trim().length < 10) {
       newErrors.comment = "Comment must be at least 10 characters.";
+    } else if (formData.comment.trim().length > 2000) {
+      newErrors.comment = "Comment cannot exceed 2000 characters.";
     }
 
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;
+    setSuccessMessage("");
+    setServerError("");
 
     const validationErrors = validateForm();
 
@@ -78,20 +94,51 @@ const Contact = () => {
       return;
     }
 
-    // Form is valid
-    console.log("Form submitted:", formData);
-
-    alert("Your message has been submitted successfully!");
-
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      comment: "",
-    });
-
     setErrors({});
+    setLoading(true);
+
+    try {
+      const response = await axios.post(
+        API_URL,
+        {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          comment: formData.comment.trim(),
+        },
+        {
+          headers: {"Content-Type": "application/json"},
+          timeout: 20000,
+        }
+      );
+
+      if (response.data?.success === false) {
+        throw new Error(response.data.message || "Failed to submit your message.");
+      }
+
+      setSuccessMessage(response.data?.message || "Your message has been submitted successfully!");
+
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        comment: "",
+      });
+
+      setErrors({});
+    } catch (error) {
+      console.error("Contact form submission error:", error.response?.data || error.message);
+
+      setServerError(error.response?.data?.message ||
+          (error.code === "ECONNABORTED"
+            ? "Request timed out. Please try again."
+            : !error.response
+              ? "Unable to connect to the server. Please try again."
+              : "Failed to submit your message. Please try again.")
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -100,7 +147,6 @@ const Contact = () => {
         <Container>
           <section className="bg-white py-5">
             <div className="px-2 sm:px-4 lg:px-6">
-
               {/* Contact Heading */}
               <div className="text-start">
                 <h2 className="mb-4 text-3xl font-bold text-gray-900 sm:text-4xl">
@@ -117,6 +163,26 @@ const Contact = () => {
                 </p>
               </div>
 
+              {/* Success Message */}
+              {successMessage && (
+                <div
+                  role="status"
+                  className="mt-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
+                >
+                  {successMessage}
+                </div>
+              )}
+
+              {/* Server Error */}
+              {serverError && (
+                <div
+                  role="alert"
+                  className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600"
+                >
+                  {serverError}
+                </div>
+              )}
+
               {/* Contact Form */}
               <div className="mt-16 w-full text-start">
                 <form
@@ -131,10 +197,14 @@ const Contact = () => {
                       value={formData.name}
                       onChange={handleChange}
                       placeholder="Name"
-                      className={`w-full border ${errors.name
+                      maxLength={100}
+                      disabled={loading}
+                      autoComplete="name"
+                      className={`w-full rounded-lg border ${
+                        errors.name
                           ? "border-red-500"
                           : "border-gray-300"
-                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500`}
                     />
 
                     {errors.name && (
@@ -152,10 +222,14 @@ const Contact = () => {
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="Email"
-                      className={`w-full border ${errors.email
+                      maxLength={254}
+                      disabled={loading}
+                      autoComplete="email"
+                      className={`w-full rounded-lg border ${
+                        errors.email
                           ? "border-red-500"
                           : "border-gray-300"
-                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500`}
                     />
 
                     {errors.email && (
@@ -173,10 +247,14 @@ const Contact = () => {
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="Phone Number"
-                      className={`w-full border ${errors.phone
+                      maxLength={14}
+                      disabled={loading}
+                      autoComplete="tel"
+                      className={`w-full rounded-lg border ${
+                        errors.phone
                           ? "border-red-500"
                           : "border-gray-300"
-                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500`}
                     />
 
                     {errors.phone && (
@@ -194,10 +272,13 @@ const Contact = () => {
                       onChange={handleChange}
                       placeholder="Comment"
                       rows={5}
-                      className={`w-full resize-none border ${errors.comment
+                      maxLength={2000}
+                      disabled={loading}
+                      className={`w-full resize-none rounded-lg border ${
+                        errors.comment
                           ? "border-red-500"
                           : "border-gray-300"
-                        } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500 rounded-lg`}
+                      } bg-white px-4 py-3 text-gray-700 outline-none transition focus:border-brand-500`}
                     />
 
                     {errors.comment && (
@@ -210,14 +291,15 @@ const Contact = () => {
                   {/* Submit */}
                   <button
                     type="submit"
-                    className="flex w-fit items-center gap-2 bg-gray-900 px-6 py-3 font-medium text-white transition hover:bg-gray-700"
+                    disabled={loading}
+                    className="flex w-fit items-center gap-2 rounded-lg bg-gray-900 px-6 py-3 font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Submit
+                    {loading ? "Submitting..." : "Submit"}
+
                     <SendHorizontal className="h-4 w-4" />
                   </button>
                 </form>
               </div>
-
             </div>
           </section>
         </Container>
