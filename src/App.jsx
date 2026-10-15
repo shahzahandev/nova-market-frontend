@@ -13,7 +13,7 @@ import WhatsAppButton from "./components/WhatsAppButton";
 
 import Home from "./pages/Home";
 import Products from "./pages/Products";
-import SingleProduct from "./pages/SingleProduct";
+// import SingleProduct from "./pages/SingleProduct";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
 import SignUp from "./pages/SignUp";
@@ -60,7 +60,7 @@ export default function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/productDetails/:id" element={<ProductDetails />} />
-                <Route path="/products/:id" element={<SingleProduct />} />
+                {/* <Route path="/products/:id" element={<SingleProduct />} /> */}
                 <Route path="/cart" element={<Cart />} />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/profile" element={<Profile />} />

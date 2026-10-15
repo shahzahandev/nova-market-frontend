@@ -8,6 +8,7 @@ import { useWishlist } from "../context/WishlistContext";
 import { useStoreInfo } from "../context/StoreInfoContext";
 
 const MAX_THUMBNAILS = 5;
+const ZOOM_SCALE = 2.2;
 const API_ORIGIN = "https://nova-market-backend-2.onrender.com";
 const USER_STORAGE_KEY = "account";
 
@@ -48,15 +49,17 @@ export default function ProductDetails() {
     const [showToast, setShowToast] = useState(false);
     const [adding, setAdding] = useState(false);
     const [cartError, setCartError] = useState("");
-    
+
+    // Hover zoom state (x, y = mouse position in percent)
+    const [zoom, setZoom] = useState({ active: false, x: 50, y: 50 });
+
     const { storeInfo } = useStoreInfo();
 
     const returnPolicy = (
-    storeInfo?.storePolicy?.returnPolicy ||
-    storeInfo?.returnPolicy ||
-    ""
-  ).trim();
-    
+        storeInfo?.storePolicy?.returnPolicy ||
+        storeInfo?.returnPolicy ||
+        ""
+    ).trim();
 
     // Fetch Product
     useEffect(() => {
@@ -135,6 +138,26 @@ export default function ProductDetails() {
             ?.quantity || 0;
     const maxInCart = stock > 0 && inCartQty >= stock;
 
+    // Hover zoom handlers
+    const handleZoomMove = (e) => {
+        // shudhu mouse hole zoom hobe, touch e hobe na
+        if (e.pointerType && e.pointerType !== "mouse") return;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+        setZoom({
+            active: true,
+            x: Math.min(100, Math.max(0, x)),
+            y: Math.min(100, Math.max(0, y)),
+        });
+    };
+
+    const handleZoomLeave = () => {
+        setZoom((prev) => ({ ...prev, active: false }));
+    };
+
     // redirect = true hole (Buy now) 0.5 second pore cart page e jabe
     // redirect = false hole (Add to cart) popup dekhabe, page change hobe na
     const addToCart = async (redirect = false) => {
@@ -156,9 +179,7 @@ export default function ProductDetails() {
             if (redirect) {
                 navigate("/cart");
             } else {
-                setCartError(
-                    `Only ${stock} item(s) available in stock. You already have ${inCartQty} in your cart.`
-                );
+                setCartError(`Only ${stock} item(s) available in stock. You already have ${inCartQty} in your cart.`);
             }
             return;
         }
@@ -267,12 +288,25 @@ export default function ProductDetails() {
                             />
                         </button>
 
-                        <div className="aspect-square w-full overflow-hidden rounded-2xl bg-mist sm:rounded-3xl">
+                        {/* Main image with hover zoom */}
+                        <div
+                            onPointerMove={handleZoomMove}
+                            onPointerLeave={handleZoomLeave}
+                            className={`aspect-square w-full overflow-hidden rounded-2xl bg-mist sm:rounded-3xl ${images[activeImage]?.url ? "md:cursor-zoom-in" : ""
+                                }`}
+                        >
                             {images[activeImage]?.url ? (
                                 <img
                                     src={imageSrc(images[activeImage].url)}
                                     alt={product.title}
-                                    className="h-full w-full object-cover transition duration-300"
+                                    draggable={false}
+                                    className="h-full w-full select-none object-cover transition-transform duration-200 ease-out will-change-transform"
+                                    style={{
+                                        transform: zoom.active
+                                            ? `scale(${ZOOM_SCALE})`
+                                            : "scale(1)",
+                                        transformOrigin: `${zoom.x}% ${zoom.y}%`,
+                                    }}
                                 />
                             ) : (
                                 <div className="flex h-full items-center justify-center text-sm text-ink/20">
@@ -331,8 +365,6 @@ export default function ProductDetails() {
                         )}
                     </div>
 
-
-
                     {/* Buy Now + Add To Cart */}
                     <div className="mt-6 flex gap-3">
                         <button
@@ -365,15 +397,10 @@ export default function ProductDetails() {
 
                     {/* Category / Brand / Tags */}
                     <div className="mt-3 flex flex-col flex-wrap gap-3">
-
-
                         {/* Stock */}
                         <div className="flex items-center gap-1 text-lg font-semibold capitalize text-ink/60">
-                            <span className="text-black">Stock :
-                            </span>
-                            <p>
-                                {stock > 0 ? ` ${stock}` : "Out"}
-                            </p>
+                            <span className="text-black">Stock :</span>
+                            <p>{stock > 0 ? ` ${stock}` : "Out"}</p>
                         </div>
 
                         {product.category && (
@@ -467,14 +494,12 @@ export default function ProductDetails() {
                             </ul>
                         </div>
                     )}
-
-                    {/* Features Bottom */}
-                    <div className="mt-8 grid grid-cols-3 gap-3 border-y border-ink/10 py-6 text-center text-xs text-ink/60">
-                        <Feature icon={Truck} label="Fast delivery" />
-                        <Feature icon={ShieldCheck} label="Secure payment" />
-                        <Feature icon={RotateCcw} label={returnPolicy} />
-                    </div>
                 </div>
+            </div>
+                <div className="mt-8 grid grid-cols-3 gap-3 border-y border-ink/10 py-6 text-center text-xs text-ink/60 lg:mt-12 lg:gap-6 lg:py-8 lg:text-sm">
+                <Feature icon={Truck} label="Fast delivery" />
+                <Feature icon={ShieldCheck} label="Secure payment" />
+                <Feature icon={RotateCcw} label={returnPolicy} />
             </div>
         </Container>
     );

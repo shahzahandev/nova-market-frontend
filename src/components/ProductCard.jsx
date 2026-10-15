@@ -49,10 +49,7 @@ export default function ProductCard({ product }) {
       (image) => image.isMain
     ) || product.images?.[0];
 
-  // =====================================================
   // Today's Date
-  // =====================================================
-
   const today = getDateOnly(
     new Date()
   );
@@ -118,7 +115,7 @@ export default function ProductCard({ product }) {
         ================================================= */}
 
         <Link
-          to={`/products/${product._id}`}
+          to={`/productDetails/${product._id}`}
           className="block"
         >
           <div
