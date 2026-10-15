@@ -61,6 +61,11 @@ export default function ProductDetails() {
         ""
     ).trim();
 
+    // Page e ashle always top theke start hobe
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, [id, location.pathname]);
+
     // Fetch Product
     useEffect(() => {
         if (product) return;
@@ -179,7 +184,9 @@ export default function ProductDetails() {
             if (redirect) {
                 navigate("/cart");
             } else {
-                setCartError(`Only ${stock} item(s) available in stock. You already have ${inCartQty} in your cart.`);
+                setCartError(
+                    `Only ${stock} item(s) available in stock. You already have ${inCartQty} in your cart.`
+                );
             }
             return;
         }
@@ -496,7 +503,9 @@ export default function ProductDetails() {
                     )}
                 </div>
             </div>
-                <div className="mt-8 grid grid-cols-3 gap-3 border-y border-ink/10 py-6 text-center text-xs text-ink/60 lg:mt-12 lg:gap-6 lg:py-8 lg:text-sm">
+
+            {/* Features Bottom (full width on large screens) */}
+            <div className="mt-8 grid grid-cols-3 gap-3 border-y border-ink/10 py-6 text-center text-xs text-ink/60 lg:mt-12 lg:gap-6 lg:py-8 lg:text-sm">
                 <Feature icon={Truck} label="Fast delivery" />
                 <Feature icon={ShieldCheck} label="Secure payment" />
                 <Feature icon={RotateCcw} label={returnPolicy} />
@@ -507,8 +516,8 @@ export default function ProductDetails() {
 
 function Feature({ icon: Icon, label }) {
     return (
-        <div className="flex flex-col items-center gap-1.5">
-            <Icon size={18} />
+        <div className="flex flex-col items-center gap-1.5 lg:gap-2">
+            <Icon size={18} className="lg:h-6 lg:w-6" />
             {label}
         </div>
     );
