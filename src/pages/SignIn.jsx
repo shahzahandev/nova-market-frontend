@@ -3,16 +3,11 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import AuthLayout from "../components/AuthLayout";
-import {
-  FormField,
-  SubmitButton,
-  FormMessage,
-} from "../components/FormField";
+import { FormField, SubmitButton, FormMessage, } from "../components/FormField";
 import { useAuth } from "../context/AuthContext";
 import { useStoreInfo } from "../context/StoreInfoContext";
 
-const LOGIN_URL =
-  "https://nova-market-backend-2.onrender.com/api/v1/auth/login";
+const LOGIN_URL = "https://nova-market-backend-2.onrender.com/api/v1/auth/login";
 
 export default function SignIn() {
   const navigate = useNavigate();
@@ -21,24 +16,13 @@ export default function SignIn() {
   const { storeInfo } = useStoreInfo();
 
   const storeName = storeInfo?.storeName || "Nova Market";
-
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [formData, setFormData] = useState({ email: "",  password: "",});
+  const [errors, setErrors] = useState({ email: "", password: "",});
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // =========================
   // FORM VALIDATION
-  // =========================
   const validateForm = () => {
     const newErrors = { email: "", password: "" };
 
@@ -49,13 +33,11 @@ export default function SignIn() {
     }
 
     setErrors(newErrors);
-
     return !newErrors.email && !newErrors.password;
   };
 
-  // =========================
+
   // HANDLE INPUT CHANGE
-  // =========================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -66,9 +48,7 @@ export default function SignIn() {
     setSuccess("");
   };
 
-  // =========================
   // HANDLE LOGIN
-  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -79,7 +59,6 @@ export default function SignIn() {
 
     try {
       setLoading(true);
-
       const res = await axios.post(LOGIN_URL, formData);
 
       // AuthContext: localStorage + "login" event (WishlistContext) handle kore
